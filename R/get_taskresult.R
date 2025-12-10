@@ -1,6 +1,6 @@
 #' Get your task results
 #'
-#' @inheritParams run_pipeline
+#' @inheritParams
 #'
 #' @returns Your original dataframe with additional columns with the coded results.
 #' @export

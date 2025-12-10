@@ -24,7 +24,17 @@ knitr::opts_chunk$set(
 
 Automated Content Coding with Large Language Models
 
+##Introduction to the Databoard
+
+The **databoard package** is designed to interface with the **databoard service**, enabling automated content coding via large language models. The service is hosted by the Department of Communication at the University of Münster and leverages the internally available model Mixtral 8x7B.
+
+Access to the service is granted to authorized users only — please contact Jakob Jünger to obtain a username and password. Once credentials are issued, users may retrieve answers from the databoard from a variety of environments (e.g. Facepager, Python scripts, or R scripts).
+
+The primary purpose of this package is to streamline work in R: by providing a minimal set of intuitive functions, it simplifies the process of submitting content for analysis and retrieving coded output — reducing setup overhead and facilitating reproducible workflows.
+
 ## Getting started
+
+    
 
 ```{r, eval=FALSE}         
 # Install the package (see below), then load it
