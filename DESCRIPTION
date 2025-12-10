@@ -1,0 +1,25 @@
+Package: databoard
+Title: Automated content coding with llms
+Version: 0.0.0.9000
+Authors@R: c( person("Jakob", "Juenger", email = "jakob.juenger@uni-muenster.de", role = c("cre", "aut")),
+    person("Katharina", "Maubach", email = "k.maubach@uni-muenster.de", role = "aut")
+    )
+Description: This package helps in accessing the databoard, a service
+    provided by the Institute for Communication Science to automatically
+    code text with large language models.
+License: MIT + file LICENSE
+Depends: 
+    httr,
+    R (>= 3.6.0)
+Imports: 
+    dplyr,
+    httr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

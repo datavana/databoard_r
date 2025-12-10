@@ -1,0 +1,62 @@
+---
+output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# Databoard-Package 
+
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+Automated Content Coding with Large Language Models
+
+## Getting started
+
+```{r, eval=FALSE}         
+# Install the package (see below), then load it
+library(databoard)
+
+# Get access token from your individual username and password and store it invisibly in the system environment
+get_token("username", "pw")
+
+# Submit a task to the databoard servive
+submit_task(input, 
+submit_task()
+```
+
+See further examples in `vignette("gettingstarted", package="databoard")`.
+
+## Concept
+
+The databoard package is made for easily accessing the databoard service, which helps to automatically code, summarize or tokenize textual content. 
+
+## Examples
+
+### Data preparation  
+
+
+
+## Authors and citation
+
+**Authors**\
+
+Jakob Jünger (University of Münster)\
+Katharina Maubach (University of Münster)\
+
+**Citation**\
+
+
