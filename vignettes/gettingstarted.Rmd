@@ -1,9 +1,34 @@
 ---
 title: "gettingstarted"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
+library(tidyverse)
+devtools::load_all(".")
+
+test <- iris |> slice_sample(n=15)
+
+rules <- list(
+    contain_v = list(
+        category    = "contain_v",
+        description = "Code when versicolor is mentioned",
+        example     = "versicolor"
+    ),
+    contain_s = list(
+        category    = "contain_s",
+        description = "Code when setosa is mentioned",
+        example     = "setosa"
+    )
+)
+
+.submit_task(test, Species, task = "coding", rules = rules)
+.get_taskresult(db_test)
+
+llm_code(test, "Species", rules  = rules)
+llm_summarize(test, "Species")
 
 ```
 

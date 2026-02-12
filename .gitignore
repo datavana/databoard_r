@@ -4,7 +4,6 @@
 .Rhistory
 .RData
 ..Rcheck
-volker_*.tar.gz
 /doc/
 /Meta/
 inst/doc
