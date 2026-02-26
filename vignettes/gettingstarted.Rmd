@@ -24,11 +24,12 @@ rules <- list(
     )
 )
 
-.submit_task(test, Species, task = "coding", rules = rules)
-.get_taskresult(db_test)
+#db_login("username", "password")
+db_test <- .submit_task(test, Species, task = "coding", rules = rules)
+db_test <- .get_taskresult(db_test)
 
-llm_code(test, "Species", rules  = rules)
-llm_summarize(test, "Species")
+test3 <- llm_code(test, "Species", rules  = rules)
+test4 <- llm_summarize(test, "Species")
 
 ```
 

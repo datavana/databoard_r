@@ -19,9 +19,6 @@
 #' @export
 .submit_task <- function(data, col, task, rules = NULL, verbose = FALSE) {
 
-  # ---- Capture the original name FIRST ----
-  original_name <- deparse(substitute(data))
-
   if (!is.logical(verbose) || length(verbose) != 1) {
     stop("`verbose` must be TRUE or FALSE.", call. = FALSE)
   }
@@ -117,15 +114,6 @@
   attr(data, "db_task") <- task
   attr(data, "db_rules") <- rules
 
-  # Create new name with db_ prefix
-  new_name <- paste0("db_", original_name)
-
-  # Assign to global environment
-  .GlobalEnv[[new_name]] <- data
-
-  message(sprintf("\nData frame saved as '%s' with %d task IDs in column 'db_id'", new_name, n))
-  message(sprintf("Task type '%s' stored as attribute", task))
-
   invisible(data)
 }
 
@@ -144,9 +132,6 @@
 #'   The data frame is saved in the parent environment with its original name.
 #' @export
 .get_taskresult <- function(data, id_col = db_id, task = NULL, rules = NULL) {
-
-  # ---- Capture the original name FIRST ----
-  original_name <- deparse(substitute(data))
 
   # ---- Try to get task and rules from attributes if not provided ----
   if (is.null(task)) {
@@ -304,9 +289,5 @@
 
   # ---- Convert to tibble and save with original name ----
   data <- tibble::as_tibble(data)
-  .GlobalEnv[[original_name]] <- data
-
-  message(sprintf(paste0("\nAll tasks completed. Results added to ",original_name)))
-
   invisible(data)
 }
