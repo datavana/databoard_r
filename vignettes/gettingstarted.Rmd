@@ -9,8 +9,23 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r include=FALSE}
-# Example data
+# What is the idea behind the databoard package?
+
+
+# Install the package and load the example data
+
+First we load the package and get some data. Databoard can be installed from source using the remotes package. 
+We are currently working to publish the package on cran.
+To try out the package you can use one of the two internal dataframes *chat_gpt* or *movies*.
+
+```{r, include=FALSE}
+# Load the package
+library(remotes)
+remotes::install_github(datavana_databoard_r)
+
+# Load an example data frame from the package
+df_movies <- databoard::movies
+df_chatgpt <- databoard::chatgpt
 
 # Song examples
 songs <- tribble(
@@ -27,8 +42,41 @@ songs <- tribble(
   10,  "Billie Eilish, Bad Guy, 2019"
 )
 
-# Rule examples
+```
 
+# Login into the service
+
+To use the databoard service and the accompagnying package you need to have credentials. 
+To obtain these please contact the [Digital Media and Computational Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml) 
+research group. In the future we aim to open the service, but for now this is the only ways to use the package.
+
+Once you have your credentials which consists of a username and a password 
+you can log into the service. This login process stores your access token for 
+the databoard API service invisibly in the system environment. 
+
+This storage and login lasts until you log out of the service. Please, especially 
+when working on a shared computer, always remember to log out.  
+
+```{r}
+# Login into the databoard service
+da_login("username", "password") # please note, both username and password must be enclosed in quotation marks. 
+
+# Logout of the databoard service
+da_logout()
+
+```
+
+# The different functionalities of the databoard
+
+We are in an ongoing process to add more functionalities to the databoard. As of
+now the service provides two main functionalities: to code text, to summarize text.
+
+# Using the service to code text
+
+## Specify your codebook
+
+```{r, include=FALSE}
+# Rule examples
 rules <- tribble(
   ~category,    ~description, ~example,
   "pop",        "Popular music with catchy melodies and broad appeal", "Bruno Mars - Uptown Funk",
@@ -45,12 +93,10 @@ rules <- tribble(
 
 ```
 
+## Code data  with llms using two lines of code
 
-# Code
 ```{r include=FALSE}
 
-# Login
-da_login()
 
 # Submit without delay
 data <- llm_code(songs, text, rules)
@@ -66,8 +112,9 @@ count(data, llm_result)
 
 ```
 
+## Additional paramters for coding
 
-# Summarize
+# Using the service to summarize text
 
 ```{r}
 
@@ -82,69 +129,7 @@ head(data$llm_result)
 
 ```
 
-## How to use the databoard package?
-
-First we load the package and get some data. Databoard can be installed from source using the remotes package. 
-We are currently working to publish the package on cran.
-To try out the package you can use one of the two internal dataframes *chat_gpt* or *movies*.
-
-```{r}
-# Load the package
-library(remotes)
-remotes::install_github(datavana_databoard_r)
-
-# Load an example data frame from the package
-df_movies <- databoard::movies
-df_chatgpt <- databoard::chatgpt
-
-```
-
-## Login into the service
-
-To use the databoard service and the accompagnying package you need to have credentials. 
-To obtain these please contact the [Digital Media and Computational Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml) 
-research group. In the future we aim to open the service, but for now this is the only ways to use the package.
-
-Once you have your credentials which consists of a username and a password 
-you can log into the service. The login last for one session, 
-after closing RStudio you have to renew the login process. 
-
-```{r}
-# Login into the service
-db_login("username", "password") # please note, both username and password must be enclosed in quotation marks. 
-
-```
-
-This login process stores your access token for the databoard API service invisibly in the system environment.
-
-## Core principles
-
-TO BE ADDED
-
-## The different functionalities of the databoard
-
-We are in an ongoing process to add more functionalities to the databoard. As of
-now the service provides three main functionalities: to code text, to summarize text
-and to annotate text.
-
-### Using the service to code text
-
-```{r}
-llm_code()
-```
-
-### Using the service to summarize text
-
-```{r}
-llm_summarize()
-```
-
-### Using the service to annotate text
-
-## Additional Parameters
-
-
-## Trouble Shooting
+# Trouble Shooting
 
 
 
