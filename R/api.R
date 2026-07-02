@@ -148,8 +148,8 @@ da_submit <- function(data, col, task, options, wait = 0) {
 
   # Main loop
   for (i in seq_len(n)) {
-    body <- tasks_run_post(task, input[i], options, wait)
-    data <- da_extract(data, body, i)
+    resp <- tasks_run_post(task, input[i], options, wait)
+    data <- da_extract(data, resp, i)
     pb$tick()
   }
 
@@ -198,8 +198,8 @@ da_fetch <- function(data, wait = 10) {
   for (i in seq_len(n)) {
 
     if (data$.task_state[i] == "PENDING") {
-      body <- tasks_run_get(data$.task_id[i], wait)
-      data <- da_extract(data, body, i)
+      resp <- tasks_run_get(data$.task_id[i], wait)
+      data <- da_extract(data, resp, i)
     }
     pb$tick()
 
@@ -218,15 +218,14 @@ da_fetch <- function(data, wait = 10) {
 #' `.task_result` on the fly if they don't yet exist.
 #'
 #' @param data A data frame to be updated.
-#' @param body A parsed API response as returned by [tasks_run_post()] or
-#'   [tasks_run_get()]. Must contain at least a `task_id`.
+#' @param resp The server response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()].
 #' @param no Integer. Row index in `data` to write to.
 #'
 #' @return The updated data frame.
 #'
 #' @keywords internal
-da_extract <- function(data, body, no) {
-
+da_extract <- function(data, resp, no) {
 
   if (!(".task_id" %in% colnames(data))) {
     data$.task_id <- NA
@@ -240,12 +239,18 @@ da_extract <- function(data, body, no) {
     data$.task_result <- NA
   }
 
-  if (is.null(body$task_id)) {
-    stop("Error: Response did not contain a valid task_id.", call. = FALSE)
+  body <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+  statuscode <- httr2::resp_status(resp)
+
+  if (!is.null(body$task_id)) {
+    data$.task_id[no] <- body$task_id
   }
 
-  data$.task_id[no] <- body$task_id
-  data$.task_state[no] <- body$state
+  if (!is.null(body$state)) {
+    data$.task_state[no] <- body$state
+  } else {
+    data$.task_state[no] <- paste0("Code ", statuscode)
+  }
 
   answers <- body$result$answers
   if (is.null(answers) || length(answers) == 0L) {
@@ -327,7 +332,7 @@ da_progress <- function(data, message = FALSE) {
     stop("Error: The data frame does not contain any task states.", call. = FALSE)
   }
 
-  result <- as.list(table(data[[".task_state"]]))
+  data$.task_state[is.na(data$.task_state)] <- "UNDEFINED"
 
   total        <- nrow(data)
   state_counts <- as.list(table(data[[".task_state"]], useNA = "ifany"))
@@ -399,8 +404,7 @@ da_finished <- function(data) {
 #' @param wait Integer. Seconds to wait server-side for the task to complete
 #'   before returning. Defaults to `0`.
 #'
-#' @return The parsed JSON response as a list, including at least `task_id`
-#'   and `state`, plus a `result` element once the task has finished.
+#' @return The server response
 #'
 #' @details Requires prior authentication via [da_login()]; the access token
 #'   is read from the `DATABOARD_ACCESSTOKEN` environment variable. Stops with
@@ -450,8 +454,8 @@ tasks_run_post <- function(task, input, options, wait = 0) {
     )
   }
 
-  body <- httr2::resp_body_json(res, simplifyVector = TRUE)
-  body
+
+  res
 }
 
 
@@ -465,8 +469,7 @@ tasks_run_post <- function(task, input, options, wait = 0) {
 #' @param wait Integer. Seconds to wait server-side for the task to complete
 #'   before returning. Defaults to `0`.
 #'
-#' @return The parsed JSON response as a list, including at least `task_id`
-#'   and `state`, plus a `result` element once the task has finished.
+#' @return The server response.
 #'
 #' @details Requires prior authentication via [da_login()]; the access token
 #'   is read from the `DATABOARD_ACCESSTOKEN` environment variable. Stops with
@@ -510,7 +513,6 @@ tasks_run_get <- function(task_id, wait = 0) {
     )
   }
 
-  body <- httr2::resp_body_json(res, simplifyVector = TRUE)
-  body
+  res
 }
 

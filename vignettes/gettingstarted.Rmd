@@ -10,6 +10,8 @@ editor_options:
 ---
 
 ```{r setup, include=F}
+
+library(tidyverse)
 knitr::opts_chunk$set(eval=F, include=T)
 ```
 
@@ -168,6 +170,7 @@ head(data$llm_result)
 
 
 ```{r}
+
 categories <- llm_summarize(
   songs, text, rules, mode="multi",
   options = list(
@@ -185,5 +188,6 @@ categories <- llm_summarize(
   ),
   wait=10
 )
+
 ```
 
