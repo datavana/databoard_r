@@ -1,35 +1,89 @@
 ---
-title: "gettingstarted"
+title: "Getting started with the databoard"
 output: html_document
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r}
+```{r include=FALSE}
+
 library(tidyverse)
-devtools::load_all(".")
 
-test <- iris |> slice_sample(n=15)
+```
 
-rules <- list(
-    contain_v = list(
-        category    = "contain_v",
-        description = "Code when versicolor is mentioned",
-        example     = "versicolor"
-    ),
-    contain_s = list(
-        category    = "contain_s",
-        description = "Code when setosa is mentioned",
-        example     = "setosa"
-    )
+
+```{r include=FALSE}
+# Example data
+
+# Song examples
+songs <- tribble(
+  ~id, ~artist,           ~title,                     ~year,
+  1,   "The Beatles",     "Hey Jude",                1968,
+  2,   "Michael Jackson", "Thriller",                1982,
+  3,   "Queen",           "Bohemian Rhapsody",       1975,
+  4,   "Adele",           "Rolling in the Deep",     2010,
+  5,   "Bob Dylan",       "Like a Rolling Stone",    1965,
+  6,   "Nirvana",         "Smells Like Teen Spirit", 1991,
+  7,   "Madonna",         "Like a Virgin",           1984,
+  8,   "Elton John",      "Your Song",               1970,
+  9,   "Taylor Swift",    "Shake It Off",            2014,
+  10,  "Billie Eilish",   "Bad Guy",                 2019
 )
 
-#db_login("username", "password")
-db_test <- .submit_task(test, Species, task = "coding", rules = rules)
-db_test <- .get_taskresult(db_test)
+songs <- mutate(songs, text = paste0(artist,", ", title, ", ", year))
 
-test3 <- llm_code(test, "Species", rules  = rules)
-test4 <- llm_summarize(test, "Species")
+# Rule examples
+
+rules <- tribble(
+  ~category,    ~description,                                                                     ~example,
+  "pop",        "Popular music with catchy melodies and broad appeal",                            "Bruno Mars - Uptown Funk",
+  "rock",       "Music characterized by strong beats and electric guitars",                       "Led Zeppelin - Stairway to Heaven",
+  "hip hop",    "Rhythmic music often featuring rapping and DJing",                               "Eminem - Lose Yourself",
+  "jazz",       "Music with swing and blue notes, improvisation, and complex harmonies",          "John Coltrane - Giant Steps",
+  "classical",  "Western art music from the medieval to the modern period",                      "Johann Sebastian Bach - Brandenburg Concerto No.3",
+  "country",    "Music with roots in American folk and western styles",                           "Dolly Parton - Jolene",
+  "electronic", "Music produced primarily with electronic instruments and synthesizers",          "Calvin Harris - Summer",
+  "rb",         "Rhythm and Blues featuring soulful vocals and groove-based instrumentation",     "Mary J. Blige - Family Affair",
+  "reggae",     "Music originating from Jamaica characterized by offbeat rhythms",                "Peter Tosh - Legalize It",
+  "metal",      "Loud, aggressive rock music with distorted guitars and emphatic rhythms",        "Iron Maiden - The Trooper"
+)
+
+```
+
+
+# Code
+```{r include=FALSE}
+
+# Login
+da_login()
+
+# Submit without delay
+data <- llm_code(songs, text, rules, mode = "single")
+
+# Fetch and wait max 10 seconds for each case to finish
+data <- da_fetch(data)
+
+# Check whether all cases were processed
+da_finished(data)
+
+# Inspect result
+count(data, llm_result)
+
+```
+
+
+# Summarize
+
+```{r}
+
+# Submit without delay
+data <- llm_summarize(songs, text)
+
+# Fetch and wait max 10 seconds for each case to finish
+data <- da_fetch(data)
+
+# Check whether all cases were processed
+da_finished(data)
 
 ```
 
