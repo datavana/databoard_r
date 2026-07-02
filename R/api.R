@@ -390,6 +390,41 @@ da_finished <- function(data) {
   all(data$.task_state != "PENDING")
 }
 
+#' Send a request to the databoard server
+#'
+#' @param endpoint The path including a leading slash
+#' @param body If provided, the body is send via a POST request.
+#'            Otherwise, a GET request is issued.
+#' @param wait Seconds to wait for an answer. Set to 0 to return immediately.
+#' @return The response object.
+da_request <- function(endpoint, body, wait = 0) {
+
+  # Get server and token from the global settings
+  server <- Sys.getenv("DATABOARD_SERVER")
+  accesstoken <- Sys.getenv("DATABOARD_ACCESSTOKEN")
+  verbose <- Sys.getenv("DATABOARD_VERBOSE") == "TRUE"
+
+  # Access token
+  if (accesstoken == "") {
+    stop(
+      "Error: No valid access token. ",
+      "Please use the function \"da_login()\" to generate an access token.",
+      call. = FALSE
+    )
+  }
+
+  req <- httr2::request(paste0(server, endpoint)) |>
+    httr2::req_auth_bearer_token(accesstoken) |>
+    httr2::req_url_query(wait = wait)
+
+  if (!missing(body)) {
+    req <- httr2::req_body_json(req, body)
+  }
+
+
+  httr2::req_perform(req)
+
+}
 
 #' Submit a single task to the Databoard API (low level)
 #'
@@ -414,24 +449,11 @@ da_finished <- function(data) {
 #' @keywords internal
 tasks_run_post <- function(task, input, options, wait = 0) {
 
-  # Get server and token from the global settings
-  server <- Sys.getenv("DATABOARD_SERVER")
-  accesstoken <- Sys.getenv("DATABOARD_ACCESSTOKEN")
-  verbose <- Sys.getenv("DATABOARD_VERBOSE") == "TRUE"
-
-  # Access token
-  if (accesstoken == "") {
-    stop(
-      "Error: No valid access token. ",
-      "Please use the function \"da_login()\" to generate an access token.",
-      call. = FALSE
-    )
-  }
-
   n <- length(input)
   if (n == 0) {
     stop("Error: empty input data.", call. = FALSE)
   }
+
 
   endpoint <- "/tasks/run"
   body <- list(
@@ -440,11 +462,7 @@ tasks_run_post <- function(task, input, options, wait = 0) {
     options = options
   )
 
-  res <- httr2::request(paste0(server, endpoint)) |>
-    httr2::req_auth_bearer_token(accesstoken) |>
-    httr2::req_url_query(wait = wait) |>
-    httr2::req_body_json(body) |>
-    httr2::req_perform()
+  res <- da_request(endpoint, body, wait = wait)
 
   status <- httr2::resp_status(res)
   if (status < 200 || status >= 300) {
@@ -453,7 +471,6 @@ tasks_run_post <- function(task, input, options, wait = 0) {
       call. = FALSE
     )
   }
-
 
   res
 }
@@ -479,31 +496,13 @@ tasks_run_post <- function(task, input, options, wait = 0) {
 #' @keywords internal
 tasks_run_get <- function(task_id, wait = 0) {
 
-  # Get server and token from the global settings
-  server <- Sys.getenv("DATABOARD_SERVER")
-  accesstoken <- Sys.getenv("DATABOARD_ACCESSTOKEN")
-  verbose <- Sys.getenv("DATABOARD_VERBOSE") == "TRUE"
-
-  # Access token
-  if (accesstoken == "") {
-    stop(
-      "Error: No valid access token. ",
-      "Please use the function \"da_login()\" to generate an access token.",
-      call. = FALSE
-    )
-  }
-
 
   if (missing(task_id)) {
     stop("Error: empty task ID.", call. = FALSE)
   }
 
-  endpoint <- "/tasks/run"
-
-  res <- httr2::request(paste0(server, endpoint, "/", task_id)) |>
-    httr2::req_auth_bearer_token(accesstoken) |>
-    httr2::req_url_query(wait = wait) |>
-    httr2::req_perform()
+  endpoint <- paste0("/tasks/run/", task_id)
+  res <- da_request(endpoint, wait = wait)
 
   status <- httr2::resp_status(res)
   if (status < 200 || status >= 300) {
