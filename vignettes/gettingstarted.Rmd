@@ -72,15 +72,14 @@ This storage and login lasts until you log out of the service. Please, especiall
 when working on a shared computer, always remember to log out.  
 
 ```{r login}
-# Login into the databoard service
-da_login() #use the function as is. You will be asked to provide username and 
-#password in a pop-up window.
+
+# Login into the databoard service.
+# You will be asked to provide username and password.
+da_login() 
+
 
 # Logout of the databoard service
 da_logout()
-
-da_login()
-
 
 ```
 
