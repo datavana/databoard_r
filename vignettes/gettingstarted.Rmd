@@ -171,8 +171,16 @@ head(data$llm_result)
 
 ```{r}
 
+rules <- tribble(
+   ~category,    ~description,
+   "genre", "The music genre",
+   "gender", "Gender of the artists",
+   "country", "The country where the song was written",
+   "year", "The year when the song was written"
+)
+
 categories <- llm_summarize(
-  songs, text, rules, mode="multi",
+  songs, text, rules, 
   options = list(
       prompts = list(
         system = paste0(

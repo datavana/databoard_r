@@ -34,7 +34,7 @@
 #'   * `"multi"` — return a value per category, where
 #'     `0` = does not apply, `1` = applies, `2` = fully applies.
 #' @param options A named list of additional options passed to the Databoard
-#'   server. `rules` and `mode` are added automatically.
+#'   server.
 #' @param wait Integer. Seconds to wait server-side per case for the task to
 #'   complete before returning.
 #'   * `0` (default): submit all tasks and return immediately with state
@@ -101,14 +101,12 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #'   should be fetched.
 #' @param col A column in `data` holding the input text. Tidy-evaluation is
 #'   supported (pass the bare column name).
-#' @param rules Optional. A data frame describing the summary structure, with
-#'   the columns `category`, `description`, and `example`. Required for
-#'   `mode = "multi"`, ignored otherwise.
-#' @param mode Character. Summary mode:
-#'   * `"single"` (default) — produce a single free-text summary per case.
-#'   * `"multi"` — produce one summary per category defined in `rules`.
+#' @param rules Optional. Provide rules to produce multiple summaries.
+#'   A data frame with the columns `category`, `description`, and `example`.
+#'   One output is created for each category. The description should prompt
+#'   what to summarize. Optionally, add an example of the expected output.
 #' @param options A named list of additional options passed to the Databoard
-#'   server. `rules` (if given) and `mode` are added automatically.
+#'   server.
 #' @param wait Integer. Seconds to wait server-side per case for the task to
 #'   complete before returning.
 #'   * `0` (default): submit all tasks and return immediately with state
@@ -138,7 +136,7 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' }
 #'
 #' @export
-llm_summarize <- function(data, col, rules, mode = "single", options = list(), wait = 0) {
+llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
 
   if (".task_id" %in% colnames(data)) {
     return (da_fetch(data))
@@ -146,8 +144,11 @@ llm_summarize <- function(data, col, rules, mode = "single", options = list(), w
 
   if (!missing(rules)) {
     options$rules <- purrr::transpose(rules)
+    options$mode <- "multi"
+  } else {
+    options$mode <- "single"
   }
-  options$mode <- mode
+
   da_submit(data, {{ col }}, "summarize", options, wait)
 
 }
