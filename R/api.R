@@ -3,14 +3,25 @@
 #
 
 
-#' Login to the databoard service
+#' Login to the Databoard service
 #'
-#' This function logs into the [Databoard-API](https://databoard.uni-muenster.de/) and returns a valid access token. Please contact the [Digital Media and Computational Methods](https://www.uni-muenster.de/Kowi/en/personen/jakob-juenger.shtml) research unit to acquire an user account. Please make sure to keep your login data and access token private.
+#' Authenticates against the Databoard-API and stores the returned access token in the system environment for subsequent
+#' calls. Please contact the Digital Media and Computational Methods research unit to acquire a user account.
+#' Keep your login data and access token private.
 #'
-#' @param username Username for the Login
-#' @param pw Password for the Login
+#' @param username Character. Username for the login. If missing, the user is
+#'   prompted interactively.
+#' @param password Character. Password for the login. If missing, the user is
+#'   prompted interactively.
+#' @param server Character. Base URL of the Databoard server. Defaults to `https://databoard.uni-muenster.de/`.
+#' @param verbose Logical. If `TRUE`, subsequent API calls will print additional
+#'   diagnostic information. Stored in the environment variable
+#'   `DATABOARD_VERBOSE`.
 #'
-#' @return The access Token saved within the system environment
+#' @return Invisibly returns `TRUE` on successful login and `FALSE` otherwise.
+#'   As a side effect, sets the environment variables `DATABOARD_SERVER`,
+#'   `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`.
+#'
 #' @export
 da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE) {
 
@@ -46,14 +57,34 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
   }
 }
 
-#' Automated content coding with llms
+#' Submit tasks to the Databoard service
 #'
-#' @param data Your data frame with text to be coded.
-#' @param col The column containing the input text.
-#' @param rules The coding rules as a dataframe with the columns `category`, `description`, and `example`.
-#' @param mode Set to `single` to get the matching category for each case.
-#'             Set to `multi` to get a value for each category, where 0 = does not apply, 1 = applies, 2= fully applies.
-#' @returns Your original dataframe with additional columns with the coded results.
+#' Submits one Databoard task per row of `data`, using the values of `col` as
+#' input. Task metadata (id, state) and results are stored back into `data` in
+#' the special columns `.task_id`, `.task_state`, and `.task_result`. After
+#' submission, results are unnested into regular columns and a progress
+#' summary is printed.
+#'
+#' @param data A data frame containing the input data.
+#' @param col A column in `data` holding the text input. Tidy-evaluation is
+#'   supported (i.e. pass the bare column name).
+#' @param task Character. The task the LLM is supposed to perform (e.g.
+#'   `"summarize"`, `"coding"`, `"annotate"`, `"triples"`).
+#' @param options A named list of task-specific options passed to the API
+#'   (e.g. coding rules, model parameters).
+#' @param wait Integer. Seconds to wait server-side for immediate completion of
+#'   each task before returning. `0` (default) returns immediately with a
+#'   `PENDING` state; larger values reduce the need for later `da_fetch()`
+#'   calls.
+#'
+#' @return The input data frame with additional columns:
+#'   `.task_id`, `.task_state`, and one column per field returned by the task
+#'   (unnested from `.task_result`).
+#'
+#' @details Tasks are submitted sequentially, one per row. The function stops
+#'   immediately if a submission fails.
+#'
+#' @export
 da_submit <- function(data, col, task, options, wait = 0) {
 
   input <- dplyr::pull(data, {{ col }})
@@ -78,6 +109,22 @@ da_submit <- function(data, col, task, options, wait = 0) {
   data
 }
 
+#' Fetch results for previously submitted tasks
+#'
+#' Iterates over rows of `data` and retrieves results for any task that is
+#' still in the `PENDING` state. Newly received results overwrite the
+#' corresponding row's `.task_state` and `.task_result` values, and are
+#' unnested into regular columns.
+#'
+#' @param data A data frame previously produced by [da_submit()]. Must contain
+#'   a `.task_id` column.
+#' @param wait Integer. Seconds to wait server-side per request for the task
+#'   to complete before returning. Defaults to `10`.
+#'
+#' @return The input data frame with updated `.task_state` values and unnested
+#'   result columns.
+#'
+#' @export
 da_fetch <- function(data, wait = 10) {
 
   # Prepare columns
@@ -114,6 +161,20 @@ da_fetch <- function(data, wait = 10) {
   data
 }
 
+#' Extract task metadata and result into a data frame row
+#'
+#' Internal helper that writes the fields of an API response `body` into row
+#' `no` of `data`. Creates the columns `.task_id`, `.task_state`, and
+#' `.task_result` on the fly if they don't yet exist.
+#'
+#' @param data A data frame to be updated.
+#' @param body A parsed API response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()]. Must contain at least a `task_id`.
+#' @param no Integer. Row index in `data` to write to.
+#'
+#' @return The updated data frame.
+#'
+#' @keywords internal
 da_extract <- function(data, body, no) {
 
 
@@ -146,6 +207,20 @@ da_extract <- function(data, body, no) {
   data
 }
 
+#' Unnest the `.task_result` list-column into regular columns
+#'
+#' Expands the tibble-valued `.task_result` column into one column per result
+#' field. If the resulting columns already exist in `data`, only rows that
+#' actually carry a task result (i.e. where `.task_result` is not `NA`) are
+#' updated; other rows keep their existing values. The `.task_id` and
+#' `.task_state` columns are moved to the end.
+#'
+#' @param data A data frame containing a `.task_result` list-column. If the
+#'   column is absent, `data` is returned unchanged.
+#'
+#' @return The data frame with `.task_result` unnested into individual columns.
+#'
+#' @keywords internal
 da_unnest <- function(data) {
 
   if (!(".task_result" %in% colnames(data))) {
@@ -180,6 +255,22 @@ da_unnest <- function(data) {
   )
 }
 
+#' Summarise task states of a Databoard data frame
+#'
+#' Returns (and optionally prints) a summary of how many tasks are in each
+#' state (e.g. `PENDING`, `SUCCESS`, `FAILURE`). The formatted message shows
+#' the percentage per state on a single line, with colour coding.
+#'
+#' @param data A data frame containing a `.task_state` column (as produced by
+#'   [da_submit()] / [da_fetch()]).
+#' @param message Logical. If `TRUE`, prints a nicely formatted, colourised
+#'   one-line summary via [cli::cli_inform()] and returns the counts
+#'   invisibly. If `FALSE` (default), just returns the counts.
+#'
+#' @return A named list with `TOTAL` (the total number of rows) and one entry
+#'   per observed task state.
+#'
+#' @export
 da_progress <- function(data, message = FALSE) {
 
   if (!(".task_state" %in% colnames(data))) {
@@ -225,6 +316,16 @@ da_progress <- function(data, message = FALSE) {
   }
 }
 
+#' Check whether all tasks have finished
+#'
+#' Returns `TRUE` if no task in `data` is still in the `PENDING` state.
+#'
+#' @param data A data frame containing a `.task_state` column.
+#'
+#' @return Logical scalar. `TRUE` if all tasks have left the `PENDING` state,
+#'   `FALSE` otherwise.
+#'
+#' @export
 da_finished <- function(data) {
 
   if (!(".task_state" %in% colnames(data))) {
@@ -235,23 +336,28 @@ da_finished <- function(data) {
 }
 
 
-#' Submit Databoard tasks for each row of a data frame
+#' Submit a single task to the Databoard API (low level)
 #'
-#' Submits a task to the Databoard API for each row of a selected column
-#' in a data frame and returns a new data frame with task IDs.
+#' Sends one `POST /tasks/run` request to the Databoard API. This is the
+#' underlying request helper used by [da_submit()]; end users typically don't
+#' need to call it directly.
 #'
-#' @param data A data frame containing the input data.
-#' @param col A column in \code{data} containing the text input.
-#'   Tidy-evaluation is supported.
-#' @param task The task the llm is supposed to perform. Can be either 'summarize', 'coding', 'annotate' or 'triples'.
-#' @param rules Your specific coding rules in the following format: .
-#' @param verbose Logical. If TRUE, prints detailed progress information.
-#' @return A data frame identical to \code{data} with an additional
-#'   \code{db_id} column containing the submitted task identifiers.
-#'   The data frame is saved in the parent environment with the name "db_" + original name.
-#' @details
-#' Tasks are submitted sequentially, one per row. The function stops
-#' immediately if a submission fails.
+#' @param task Character. The task type (e.g. `"summarize"`, `"coding"`,
+#'   `"annotate"`, `"triples"`).
+#' @param input Character. The input text for the task. Must be non-empty.
+#' @param options A named list of task-specific options passed to the API.
+#' @param wait Integer. Seconds to wait server-side for the task to complete
+#'   before returning. Defaults to `0`.
+#'
+#' @return The parsed JSON response as a list, including at least `task_id`
+#'   and `state`, plus a `result` element once the task has finished.
+#'
+#' @details Requires prior authentication via [da_login()]; the access token
+#'   is read from the `DATABOARD_ACCESSTOKEN` environment variable. Stops with
+#'   an informative error if the token is missing or the HTTP status is not
+#'   2xx.
+#'
+#' @keywords internal
 tasks_run_post <- function(task, input, options, wait = 0) {
 
   # Get server and token from the global settings
@@ -299,19 +405,25 @@ tasks_run_post <- function(task, input, options, wait = 0) {
 }
 
 
-#' Get task results and merge with original data frame
+#' Retrieve a single task result from the Databoard API (low level)
 #'
-#' Retrieves results for all task IDs in a data frame and adds result columns.
+#' Sends one `GET /tasks/run/{task_id}` request to the Databoard API. This is
+#' the underlying request helper used by [da_fetch()]; end users typically
+#' don't need to call it directly.
 #'
-#' @param data A data frame containing task IDs (typically created by db_submit_task).
-#' @param id_col The column containing task IDs. Default is "db_id".
-#'   Tidy-evaluation is supported.
-#' @param task The task type that was performed. Can be either 'summarize', 'coding', 'annotate' or 'triples'.
-#' @param rules Your specific coding rules (needed to extract category names for coding tasks).
-#' @return The original data frame with additional columns containing the results.
-#'   For 'summarize' task: adds a 'db_summary' column.
-#'   For 'coding' task: adds 'db_<category>' columns for each category in rules.
-#'   The data frame is saved in the parent environment with its original name.
+#' @param task_id Character. The identifier of a previously submitted task.
+#' @param wait Integer. Seconds to wait server-side for the task to complete
+#'   before returning. Defaults to `0`.
+#'
+#' @return The parsed JSON response as a list, including at least `task_id`
+#'   and `state`, plus a `result` element once the task has finished.
+#'
+#' @details Requires prior authentication via [da_login()]; the access token
+#'   is read from the `DATABOARD_ACCESSTOKEN` environment variable. Stops with
+#'   an informative error if the token is missing or the HTTP status is not
+#'   2xx.
+#'
+#' @keywords internal
 tasks_run_get <- function(task_id, wait = 0) {
 
   # Get server and token from the global settings
