@@ -58,13 +58,13 @@ rules <- tribble(
 da_login()
 
 # Submit without delay
-data <- llm_code(songs, text, rules, mode = "single")
+data <- llm_code(songs, text, rules)
 
-# Fetch and wait max 10 seconds for each case to finish
-data <- da_fetch(data)
-
-# Check whether all cases were processed
-da_finished(data)
+# Once you submitted your tasks, call the same method with
+# your data frame as the first parameter
+# Task results that are ready will be added.
+# Keep calling until all result are finished.
+data <- llm_code(data)
 
 # Inspect result
 count(data, llm_result)
@@ -80,10 +80,10 @@ count(data, llm_result)
 data <- llm_summarize(songs, text)
 
 # Fetch and wait max 10 seconds for each case to finish
-data <- da_fetch(data)
+data <- llm_summarize(data)
 
-# Check whether all cases were processed
-da_finished(data)
+# Inspect the summaries
+head(data$llm_result)
 
 ```
 

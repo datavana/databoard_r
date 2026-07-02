@@ -5,17 +5,20 @@
 
 #' Login to the Databoard service
 #'
-#' Authenticates against the Databoard-API and stores the returned access token in the system environment for subsequent
-#' calls. Please contact the Digital Media and Computational Methods research unit to acquire a user account.
+#' Authenticates against the Databoard-API and stores the returned access token
+#' in the system environment for subsequent calls. Please contact the Digital
+#' Media and Computational Methods research unit to acquire a user account.
 #' Keep your login data and access token private.
 #'
 #' @param username Character. Username for the login. If missing, the user is
 #'   prompted interactively.
 #' @param password Character. Password for the login. If missing, the user is
-#'   prompted interactively.
-#' @param server Character. Base URL of the Databoard server. Defaults to `https://databoard.uni-muenster.de/`.
-#' @param verbose Logical. If `TRUE`, subsequent API calls will print additional
-#'   diagnostic information. Stored in the environment variable
+#'   prompted interactively with a masked prompt (via the `askpass` package
+#'   if available, otherwise an unmasked `readline()` fallback).
+#' @param server Character. Base URL of the Databoard server. Defaults to
+#'   `https://databoard.uni-muenster.de/`.
+#' @param verbose Logical. If `TRUE`, subsequent API calls will print
+#'   additional diagnostic information. Stored in the environment variable
 #'   `DATABOARD_VERBOSE`.
 #'
 #' @return Invisibly returns `TRUE` on successful login and `FALSE` otherwise.
@@ -26,25 +29,47 @@
 da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE) {
 
   if (missing(username)) {
-    username <- readline(prompt="Please, enter your user name: ")
+    if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
+      username <- rstudioapi::showPrompt(
+        title   = "Databoard login",
+        message = "Please, enter your user name:",
+        default = ""
+      )
+    } else {
+      username <- readline(prompt = "Please, enter your user name: ")
+    }
   }
 
   if (missing(password)) {
-    password <- readline(prompt="Please, enter your password: ")
+    if (requireNamespace("askpass", quietly = TRUE)) {
+      password <- askpass::askpass("Please, enter your password: ")
+    } else {
+      warning(
+        "Package 'askpass' is not installed; password input will not be masked. ",
+        "Install it with install.packages(\"askpass\") for a secure prompt.",
+        call. = FALSE
+      )
+      password <- readline(prompt = "Please, enter your password: ")
+    }
   }
 
-  body <- list(username = username, password = password)
+  if (is.null(username) || is.null(password) || !nzchar(username) || !nzchar(password)) {
+    message("Login cancelled.")
+    return(invisible(FALSE))
+  }
+
+  body     <- list(username = username, password = password)
   endpoint <- paste0(server, "/token")
-  res <- httr::POST(endpoint, body = body, encode = "form")
+  res      <- httr::POST(endpoint, body = body, encode = "form")
 
   if (httr::status_code(res) == 200) {
 
     accesstoken <- httr::content(res, as = "parsed", type = "application/json")$access_token
 
     settings <- list(
-      DATABOARD_SERVER = server,
+      DATABOARD_SERVER      = server,
       DATABOARD_ACCESSTOKEN = accesstoken,
-      DATABOARD_VERBOSE = verbose
+      DATABOARD_VERBOSE     = verbose
     )
     do.call(Sys.setenv, settings)
 
@@ -55,6 +80,31 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
     warning("Invalid username or password.", call. = FALSE)
     return(invisible(FALSE))
   }
+}
+
+#' Log out from the Databoard service
+#'
+#' Clears the environment variables set by [da_login()]
+#' (`DATABOARD_SERVER`, `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`),
+#' effectively ending the current session. Subsequent API calls will fail
+#' until [da_login()] is called again.
+#'
+#' @return Invisibly returns `TRUE`.
+#'
+#' @seealso [da_login()]
+#'
+#' @export
+da_logout <- function() {
+
+  Sys.unsetenv(c(
+    "DATABOARD_SERVER",
+    "DATABOARD_ACCESSTOKEN",
+    "DATABOARD_VERBOSE"
+  ))
+
+  message("Logged out, access token cleared from system environment.")
+
+  invisible(TRUE)
 }
 
 #' Submit tasks to the Databoard service

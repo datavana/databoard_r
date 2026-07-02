@@ -3,6 +3,7 @@
 export(da_fetch)
 export(da_finished)
 export(da_login)
+export(da_logout)
 export(da_progress)
 export(da_submit)
 export(llm_code)
