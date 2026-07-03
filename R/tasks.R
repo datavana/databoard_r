@@ -2,12 +2,84 @@
 # Wrappers for specific tasks
 #
 
+#' Prompt an LLM with custom prompts
+#'
+#' Provide your prompts and simply get the data back.
+#' The databoard generates one prompt from each row in the data frame.
+#' In the prompts, you can use two placeholders to refer to the data
+#'
+#' `{{text}}` is replaced by the value in the given column of each case.
+#'
+#' `{{rules}}` is replaced by a rule book generated from your rules data frame.
+#'
+#' The method simplifies passing custom prompts to the databoard server by
+#' levaraging the generic summary workflow. This workflow bypasses all data postprocessing steps
+#' and thus returns the raw results. See the databoard server documentation
+#' for further details.
+#'
+#' @param data A data frame containing the texts to be processed, or a data frame
+#'   previously returned by `llm_prompt()` whose pending results should be
+#'   fetched.
+#' @param col A column in `data` holding the input text. Tidy-evaluation is
+#'   supported (pass the bare column name).
+#' @param rules A data frame with the columns `category`, `description`, and `example`. One row per category.
+#'              From the data frame, if present, a rule book is generated and embedded into the prompts.
+#' @param prompt.system The system prompt. If you provide a character vector, the elements are collapsed using a line break.
+#' @param prompt.user The user prompt. If you provide a character vector, the elements are collapsed using a line break.
+#' @param options A named list of additional options passed to the Databoard
+#'   server. See the databoad server documentation for available options.
+#' @param wait Integer. Seconds to wait server-side per case for the task to
+#'   complete before returning.
+#'   * `0` (default): submit all tasks and return immediately with state
+#'     `PENDING`. Fetch results later by calling `llm_code(data)` again.
+#'   * `> 0`: wait up to that many seconds per case for the result.
+#'
+#' @return The input data frame with the columns `.task_id` and `.task_state` added.
+#' When results are available, they are added to the `llm_result` column.
+#'
+#' @seealso [llm_summarize()], [llm_code()], [da_submit()], [da_fetch()]]
+#'
+#' @examples
+#' \dontrun{
+#' ```
+#' da_login()
+#'
+#' data <- llm_prompt(
+#'   songs, text,
+#'   prompt.system = "Output a comma separated list of topics. Just the list, nothing else.",
+#'   prompt.user = "{{text}}",
+#'   wait = 10
+#')
+#' ```
+#' }
+#'
+#' @export
+llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.user = NULL, options = list(), wait = 0) {
+
+  if (".task_id" %in% colnames(data)) {
+    return (da_fetch(data))
+  }
+
+  if (!missing(rules)) {
+    options$rules <- purrr::transpose(rules)
+  }
+
+  options$mode <- "summarize"
+  options$prompts <- list(
+    system = paste0(prompt.system, collapse = "\n"),
+    user = paste0(prompt.user, collapse = "\n")
+  )
+
+  da_submit(data, {{ col }}, "summarize", options, wait)
+
+}
 
 #' Automated content coding with an LLM
 #'
 #' Submits each row of `data` to the Databoard `coding` task, which asks an
 #' LLM to assign category codes to the text in `col` based on a set of coding
-#' `rules`.
+#' `rules`. The databoard server pre-processes the rules to embed them in the prompt,
+#' and post-processes the LLM answer to split it into columns for a data frame.
 #'
 #' The function has two modes of operation, dispatched automatically:
 #'
@@ -22,6 +94,22 @@
 #' repeatedly on the returned data frame until all results are in (see
 #' [da_finished()]).
 #'
+#' To customize the prompts, provide them in the options:
+#'
+#' ```
+#' options = list(
+#'   prompts = list(
+#'     system = "YOURSYSTEMPROMPT",
+#'     user = "YOURUSERPROMPT"
+#'   )
+#' )
+#' ```
+#'
+#' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
+#' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
+#'
+#' See the databoard documentation for further options.
+#'
 #' @param data A data frame containing the texts to be coded, or a data frame
 #'   previously returned by `llm_code()` whose pending results should be
 #'   fetched.
@@ -34,7 +122,7 @@
 #'   * `"multi"` — return a value per category, where
 #'     `0` = does not apply, `1` = applies, `2` = fully applies.
 #' @param options A named list of additional options passed to the Databoard
-#'   server.
+#'   server. See the databoad server documentation for available options.
 #' @param wait Integer. Seconds to wait server-side per case for the task to
 #'   complete before returning.
 #'   * `0` (default): submit all tasks and return immediately with state
@@ -45,7 +133,7 @@
 #'   added. When results are available, they are unnested into additional
 #'   result columns (e.g. `llm_result`).
 #'
-#' @seealso [llm_summarize()], [da_submit()], [da_fetch()], [da_finished()]
+#' @seealso [llm_summarize()], [llm_prompt()], [da_submit()], [da_fetch()]]
 #'
 #' @examples
 #' \dontrun{
@@ -81,6 +169,8 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' Submits each row of `data` to the Databoard `summarize` task, which asks
 #' an LLM to summarise the text in `col`. Optionally, a `rules` data frame
 #' can be provided to produce structured, per-category summaries.
+#' The databoard server pre-processes the rules to embed them in the prompt,
+#' and post-processes the LLM answer to split it into columns for a data frame.
 #'
 #' The function has two modes of operation, dispatched automatically:
 #'
@@ -95,6 +185,22 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' Typical usage is to call `llm_summarize()` once to submit, and then call
 #' it repeatedly on the returned data frame until all results are in (see
 #' [da_finished()]).
+#'
+#' To customize the prompts, provide them in the options:
+#'
+#' ```
+#' options = list(
+#'   prompts = list(
+#'     system = "YOURSYSTEMPROMPT",
+#'     user = "YOURUSERPROMPT"
+#'   )
+#' )
+#' ```
+#'
+#' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
+#' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
+#'
+#' See the databoard documentation for further options.
 #'
 #' @param data A data frame containing the texts to be summarised, or a data
 #'   frame previously returned by `llm_summarize()` whose pending results
@@ -117,7 +223,7 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #'   added. When results are available, they are unnested into additional
 #'   result columns (e.g. `llm_result`).
 #'
-#' @seealso [llm_code()], [da_submit()], [da_fetch()], [da_finished()]
+#' @seealso [llm_prompt()], [llm_code()], [da_submit()], [da_fetch()]]
 #'
 #' @examples
 #' \dontrun{

@@ -340,21 +340,11 @@ da_progress <- function(data, message = FALSE) {
 
   if (message) {
 
-    # Colour palette for known states; fallback to white
-    state_colors <- list(
-      SUCCESS = cli::col_green,
-      PENDING = cli::col_yellow,
-      FAILURE = cli::col_red,
-      RETRY   = cli::col_magenta,
-      STARTED = cli::col_cyan,
-      REVOKED = cli::col_silver
-    )
-
     parts <- vapply(names(state_counts), function(state) {
       n       <- state_counts[[state]]
       pct     <- if (total > 0) n / total * 100 else 0
       label   <- if (is.na(state) || is.null(state)) "NA" else state
-      colorfn <- state_colors[[label]] %||% cli::col_white
+      colorfn <- STATE_COLORS[[label]] %||% cli::col_white
       colorfn(sprintf("%.0f%% %s", pct, label))
     }, character(1))
 
