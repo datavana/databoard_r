@@ -105,6 +105,9 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
 #' )
 #' ```
 #'
+#' If the prompts are given as character vectors, their elements are collapsed
+#' using a line break (as in [llm_prompt()]).
+#'
 #' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
 #' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
 #'
@@ -160,6 +163,14 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 
   options$rules <- purrr::transpose(rules)
   options$mode <- mode
+
+  if (!is.null(options$prompts$system)) {
+    options$prompts$system <- paste0(options$prompts$system, collapse = "\n")
+  }
+  if (!is.null(options$prompts$user)) {
+    options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
+  }
+
   da_submit(data, {{ col }}, "coding", options, wait)
 
 }
@@ -196,6 +207,9 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #'   )
 #' )
 #' ```
+#'
+#' If the prompts are given as character vectors, their elements are collapsed
+#' using a line break (as in [llm_prompt()]).
 #'
 #' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
 #' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
@@ -253,6 +267,13 @@ llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
     options$mode <- "multi"
   } else {
     options$mode <- "single"
+  }
+
+  if (!is.null(options$prompts$system)) {
+    options$prompts$system <- paste0(options$prompts$system, collapse = "\n")
+  }
+  if (!is.null(options$prompts$user)) {
+    options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
   }
 
   da_submit(data, {{ col }}, "summarize", options, wait)
