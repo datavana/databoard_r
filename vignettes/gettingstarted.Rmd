@@ -30,31 +30,23 @@ now the service provides two main functionalities: to code text, to summarize te
 
 First we load the package and get some data. Databoard can be installed from source using the remotes package. 
 We are currently working to publish the package on cran.
-To try out the package you can use one of the two internal dataframes *chat_gpt* or *movies*.
+
+To try out the package you can use the internal dataframes *movies*, which contains 4 columns:
+- an id
+- the name of a movie
+- a short abstract which can be used to code the data
+- a long review, which can be employed to summarize the data
 
 ```{r data}
 # Load the package
+
 library(remotes)
 remotes::install_github(datavana_databoard_r)
 
 # Load an example data frame from the package
-df_movies <- databoard::movies
-df_chatgpt <- databoard::chatgpt
 
-# Song examples
-songs <- tribble(
-  ~id, ~text,
-  1,   "The Beatles, Hey Jude, 1968",
-  2,   "Michael Jackson, Thriller, 1982",
-  3,   "Queen, Bohemian Rhapsody, 1975",
-  4,   "Adele, Rolling in the Deep, 2010",
-  5,   "Bob Dylan, Like a Rolling Stone, 1965",
-  6,   "Nirvana, Smells Like Teen Spirit, 1991",
-  7,   "Madonna, Like a Virgin, 1984",
-  8,   "Elton John, Your Song, 1970",
-  9,   "Taylor Swift, Shake It Off, 2014",
-  10,  "Billie Eilish, Bad Guy, 2019"
-)
+movies <- databoard::movies # example data for coding tasks
+ # example data for summarizing tasks
 
 ```
 
@@ -67,9 +59,10 @@ research group. In the future we aim to open the service, but for now this is th
 Once you have your credentials which consists of a username and a password 
 you can log into the service. This login process stores your access token for 
 the databoard API service invisibly in the system environment.
+When you are succesfully logged in the message Logged in, access token saved in system environment" appears in the console.
 
-This storage and login lasts until you log out of the service. Please, especially 
-when working on a shared computer, always remember to log out.  
+This storage and login lasts until you close R or log out of the service. Please, especially 
+when working on a shared computer, always remember to close the application or log out.  
 
 ```{r login}
 
@@ -77,9 +70,26 @@ when working on a shared computer, always remember to log out.
 # You will be asked to provide username and password.
 da_login() 
 
-
 # Logout of the databoard service
 da_logout()
+
+```
+
+## Using the service to summarize text
+
+In our example dataframe ```movies``` we have a column ```review``` which features lengthy reviews of the moview plots. To summarize them into shorter paragraphs we use the llm_summarize function which only needs the dataframe and the column with the text to be summarized.
+
+
+```{rsummarize}
+
+# Submit without delay
+data <- llm_summarize(movies, review)
+
+# Fetch and wait max 10 seconds for each case to finish
+data <- llm_summarize(data)
+
+# Inspect the summaries
+head(data$llm_result)
 
 ```
 
@@ -102,32 +112,20 @@ The codebook needs to be structures into three columns:
 - description: a short description of the category
 - example: a short example
 
+We have implemented a example codebook for the dataset movies called movie_rules.
+
 ```{r codebook}
 # Rule examples
-rules <- tribble(
-  ~category,    ~description, ~example,
-  "pop",        "Popular music with catchy melodies and broad appeal", "Bruno Mars - Uptown Funk",
-  "rock",       "Music characterized by strong beats and electric guitars", "Led Zeppelin - Stairway to Heaven",
-  "hip hop",    "Rhythmic music often featuring rapping and DJing", "Eminem - Lose Yourself",
-  "jazz",       "Music with swing and blue notes, improvisation, and complex harmonies", "John Coltrane - Giant Steps",
-  "classical",  "Western art music from the medieval to the modern period", "Johann Sebastian Bach - Brandenburg Concerto No.3",
-  "country",    "Music with roots in American folk and western styles", "Dolly Parton - Jolene",
-  "electronic", "Music produced primarily with electronic instruments and synthesizers", "Calvin Harris - Summer",
-  "rb",         "Rhythm and Blues featuring soulful vocals and groove-based instrumentation", "Mary J. Blige - Family Affair",
-  "reggae",     "Music originating from Jamaica characterized by offbeat rhythms", "Peter Tosh - Legalize It",
-  "metal",      "Loud, aggressive rock music with distorted guitars and emphatic rhythms", "Iron Maiden - The Trooper"
-)
+rules <- databoard::movies_rules
 
 ```
 
 ### Code data  with llms using two lines of code
 
-
 ```{r code}
 
-
 # Submit without delay
-data <- llm_code(songs, text, rules)
+data <- llm_code(movies, abstract, rules)
 
 # Once you submitted your tasks, call the same method with
 # your data frame as the first parameter
@@ -142,33 +140,21 @@ count(data, llm_result)
 
 ### Additional parameters for coding
 
-If you want to specify more parameters for coding you can use the more generic llm_summarize function which provides additional paramters. 
+We have implemented additional parameters for the coding process. The package supports:
 
-### Want individual prompts?
+-
+-
+-
+-
 
-TEXT + eigene Vignette
-
-## Using the service to summarize text
-
-See also
-
-```{rsummarize}
-
-# Submit without delay
-data <- llm_summarize(songs, text)
-
-# Fetch and wait max 10 seconds for each case to finish
-data <- llm_summarize(data)
-
-# Inspect the summaries
-head(data$llm_result)
+```{r}
 
 ```
 
-## Trouble Shooting
 
 
-## Custom prompt examples
+
+## Custom prompts
 
 
 In the simplest example, one prompt is generated for each case.
@@ -190,7 +176,6 @@ topics |>
   count(llm_result, sort=T)
 
 ```
-
 
 The following example uses a custom prompt. In contrast to the generic `llm_prompt()` method,
 the prompts are provided in the options, directly passed to the databoard API.
@@ -231,4 +216,17 @@ categories <- llm_summarize(
 )
 
 ```
+
+## Trouble Shooting
+
+## Whats Next
+
+# Use data from the sotu package concerning the American State of the Union address
+#install.packages("sotu")
+library(sotu)
+sotu <- 
+  tibble(sotu_text) |> 
+  mutate(id = row_number()) |> 
+  rename(text = sotu_text) |> 
+  head(10)
 
