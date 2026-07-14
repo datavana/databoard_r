@@ -7,7 +7,7 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(databoardpackage)
+library(databoard_r)
 
-test_check("databoardpackage")
-get_token(username, pw)
+test_check("databoard_r")
+

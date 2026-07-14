@@ -11,7 +11,8 @@ editor_options:
 
 ```{r setup, include=F}
 
-library(tidyverse)
+library(dplyr)
+library(tibble)
 knitr::opts_chunk$set(eval=F, include=T)
 ```
 

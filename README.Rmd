@@ -50,8 +50,10 @@ To try out the package you can use one of the two internal dataframes *chat_gpt*
 
 ```{r, eval=FALSE}
 # Load the package
+
 library(remotes)
-remotes::install_github(datavana_databoard_r)
+remotes::install_github("datavana/databoard_r")
+
 
 # Load an example data frame from the package
 df_movies <- databoard::movies

@@ -2,17 +2,15 @@ Package: databoard
 Title: Automated Content Coding with Large Language Models
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Katharina", "Maubach", email = "k.maubach@uni-muenster.de",
-           role = c("cre", "aut"))
-    person("Jakob", "Juenger", email = "jakob.juenger@uni-muenster.de",
-           role = c("cre", "aut")),
+    person("Katharina", "Maubach", email = "k.maubach@uni-muenster.de", role = c("cre", "aut")),
+    person("Jakob", "Juenger", email = "jakob.juenger@uni-muenster.de", role = c("aut"))
     )
 Description: Provides an R interface to the Databoard service of the
     Digital Media and Computational Methods research unit at the university of Münster.
     Databoard uses large language models to automatically summarise,
     code, and annotate text. The package handles authentication, task
     submission, progress tracking, and retrieval of results.
-License: MIT
+License: MIT + file LICENSE
 URL: https://databoard.uni-muenster.de/
 BugReports: https://github.com/datavana/databoard_r/issues
 Depends:
