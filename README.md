@@ -17,7 +17,7 @@ providing a minimal set of intuitive functions, it simplifies the
 process of submitting content for analysis and retrieving coded output —
 reducing setup overhead and facilitating reproducible workflows.
 
-## How to use the databoard package?
+## How to install the databoard package?
 
 Databoard can be installed from source using the remotes package.
 
@@ -46,7 +46,7 @@ This login process stores your access token for the databoard API
 service invisibly in the system environment. The login lasts for one
 session, after closing RStudio you have to renew the login process.
 
-## Using the databoard
+## How to use the databoard package?
 
 The service provides three main functions:
 
