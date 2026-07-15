@@ -1,0 +1,178 @@
+---
+title: "Create custom prompts and include additional parameters"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=F}
+
+library(dplyr)
+library(tibble)
+knitr::opts_chunk$set(eval=F, include=T)
+```
+
+## Prepare data and login
+
+In a first step we load the package and data and login into the service 
+(see vignette introduction for further information). 
+
+```{r}
+library(databoard)
+df <- databoard::movies # example data 
+rules <- databoard::movies_rules
+da_login()
+```
+
+## Additional Parameters for using the databoard
+
+We have implemented additional parameters for the summary and coding process. 
+These include the wait and the mode parameter as well as a list of additional options (model choice, temperature and pre-processing).
+
+### Wait Parameter
+
+The wait parameter describes the time (in seconds) the service waits for each request (default = 0, values range from 0 to 10). Note that the service is designed to be called multiple times to gather all results irrespective of wait time. Therefore for typical usecases the default of zero waittime is the most sensible. 
+
+```{r}
+# Wait Parameter
+results <- llm_summarize(df, review, wait = 10)
+```
+
+### Mode Parameter
+
+The coding  workflow has multiple modes to process the data. These modes describe different system prompts (see [here](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts) for the exact prompts). We differentiate between:
+
+- single mode (default): categorizes each text into the most appropriate category 
+- multi mode: Determines for each category whether it strongly applies (2), applies (1) or does not apply.
+
+```{r}
+# Coding Single Mode (default)
+
+results_single <- llm_code(df, abstract, rules)
+results_single <- llm_code(results_single)
+count(results_single, llm_result)
+
+# Coding Multi Mode
+
+results_multi <- llm_code(df, abstract, rules, mode = "multi")
+results_multi <- llm_code(results_multi)
+View(results_multi)
+```
+
+### Additional options
+
+Additionally to the parameters the package supports a list of options that can be passed to the functions. These include the model choice, the temperature and the amount of preprocessing. 
+
+- **model**: Choose a LLM model. Supported models include ```'Llama-3.3-70B' (default)```, ```'mistral-small'```, ```'gemma-3-27b-it'```, ```'gemma-3'```, ```'gpt-oss-120b'```, ```'Apertus-8B-Instruct-2509'```. 
+- **temperature**: Overrides the server default which is (NOT_GIVEN)
+- **raw**: If true, returns the raw LLM output and by passes all task post-processing (default: false). 
+
+All these options can be called in the functions as follows:
+
+```{r}
+results_options <- llm_code(df, abstract, rules, 
+                            options = list(model = 'mistral-small',
+                                           temperature = "2")
+                            )
+
+results_options <- llm_code(results_options)
+
+View(results_options)
+
+```
+
+
+
+
+```{r}
+
+Example for a coding task:
+
+{
+  "task": "coding",
+  "input": ["How is it going?", "Hello", "Sure!"],
+
+  "options": {
+      "rules": [
+          {"category":"A","description":"A question", "example":"Why?"},
+          {"category":"B","description":"An answer", "example":"Yes!"}
+      ],
+      "mode": "multi"
+  }
+}
+
+```
+
+## Custom Prompts
+
+Prompts: In the options, you can optionally define a custom prompt template name in the prompts key. The prompt template files matching the name must be available on the server. Alternatively, provide an object with the prompt text in the user and system values. The templates support the following keys in double curly bracket placeholders
+
+    {{text}}: Will be replaced by the input value.
+    {{rules}}: Will be replaced by the prepared codebook, annotation or summary rules. The databoard automatically prepares a markdown text representation of the rules.
+
+
+## Custom prompts
+
+In the simplest example, one prompt is generated for each case.
+You ingest your data by using the `{{text}}` placeholder.
+The result is added to the llm_result column of the data frame,
+ready for your post-processing routines.
+
+```{r}
+
+topics <- llm_prompt(
+  songs, text,
+  prompt.system = "Output a comma separated list of topics. Just the list, nothing else.",
+  prompt.user = "{{text}}",
+  wait=10
+)
+
+topics |>
+  separate_rows(llm_result, sep=", *") |>
+  count(llm_result, sort=T)
+
+```
+
+The following example uses a custom prompt. In contrast to the generic `llm_prompt()` method,
+the prompts are provided in the options, directly passed to the databoard API.
+Further, using the summary workflow, the databoard server post-processes the result to split it into one field for each category.
+
+```{r}
+
+
+
+rules <- tribble(
+   ~category,    ~description,
+   "genre", "The music genre",
+   "gender", "Gender of the artists",
+   "country", "The country where the song was written",
+   "year", "The year when the song was written"
+)
+
+categories <- llm_summarize(
+  songs, text, rules, 
+  options = list(
+      prompts = list(
+        system = c(
+          "Carefully read the provided rules and the text.",
+          "Determine for each category in the rules one keyword.",
+          "Respond with one line per provided category.",
+          "Start the line with the name of the category, followed by a colon and the suggested keyword.",
+          "If you can't decide on a keyword, output `NA` for the respective category."
+        ),
+        user = paste0(
+          "# Rules:",
+          "{{rules}}", 
+          "# Text: ", 
+          "`{{text}}`"
+        )
+    )
+  ),
+  wait=10
+)
+
+```

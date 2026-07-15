@@ -42,12 +42,11 @@ To try out the package you can use the internal dataframes *movies*, which conta
 # Load the package
 
 library(remotes)
-remotes::install_github(datavana_databoard_r)
+remotes::install_github("datavana/databoard_r")
 
 # Load an example data frame from the package
 
-movies <- databoard::movies # example data for coding tasks
- # example data for summarizing tasks
+df <- databoard::movies # example data 
 
 ```
 
@@ -84,13 +83,13 @@ In our example dataframe ```movies``` we have a column ```review``` which featur
 ```{rsummarize}
 
 # Submit without delay
-data <- llm_summarize(movies, review)
+results <- llm_summarize(df, review)
 
 # Fetch and wait max 10 seconds for each case to finish
-data <- llm_summarize(data)
+results <- llm_summarize(results)
 
 # Inspect the summaries
-head(data$llm_result)
+head(results$llm_result, n=3)
 
 ```
 
@@ -103,9 +102,11 @@ This function needs three arguments:
 - the name of the column in which we can find the content (typically 'text')
 - the codebook (see below) 
 
+Within the databoard we have implemented various [systemprompts](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts). The default prompt for the coding process is the single option categorizing each text into one category. See the customprompts vignette for further examples.
+
 ### Specify your codebook
 
-The databoard accepts codebooks in form of a tibble data-object. If you have a csv file with the codebook information simply load it into R to use.
+Besides from the system prompt the databoard needs your individual codebook for coding. The databoard accepts codebooks in form of a tibble data-object. If you have a csv file with the codebook information simply load it into R to use.
 
 The codebook needs to be structures into three columns:
 
@@ -126,108 +127,24 @@ rules <- databoard::movies_rules
 ```{r code}
 
 # Submit without delay
-data <- llm_code(movies, abstract, rules)
+results <- llm_code(df, abstract, rules)
 
 # Once you submitted your tasks, call the same method with
 # your data frame as the first parameter
 # Task results that are ready will be added.
 # Keep calling until all result are finished.
-data <- llm_code(data)
+results <- llm_code(results)
 
 # Inspect result
-count(data, llm_result)
+library(dplyr)
+count(results, llm_result)
 
 ```
-
-### Additional parameters for coding
-
-We have implemented additional parameters for the coding process. The package supports:
-
--
--
--
--
-
-```{r}
-
-```
-
-
-
-
-## Custom prompts
-
-
-In the simplest example, one prompt is generated for each case.
-You ingest your data by using the `{{text}}` placeholder.
-The result is added to the llm_result column of the data frame,
-ready for your post-processing routines.
-
-```{r}
-
-topics <- llm_prompt(
-  songs, text,
-  prompt.system = "Output a comma separated list of topics. Just the list, nothing else.",
-  prompt.user = "{{text}}",
-  wait=10
-)
-
-topics |>
-  separate_rows(llm_result, sep=", *") |>
-  count(llm_result, sort=T)
-
-```
-
-The following example uses a custom prompt. In contrast to the generic `llm_prompt()` method,
-the prompts are provided in the options, directly passed to the databoard API.
-Further, using the summary workflow, the databoard server post-processes the result to split it into one field for each category.
-
-```{r}
-
-
-
-rules <- tribble(
-   ~category,    ~description,
-   "genre", "The music genre",
-   "gender", "Gender of the artists",
-   "country", "The country where the song was written",
-   "year", "The year when the song was written"
-)
-
-categories <- llm_summarize(
-  songs, text, rules, 
-  options = list(
-      prompts = list(
-        system = c(
-          "Carefully read the provided rules and the text.",
-          "Determine for each category in the rules one keyword.",
-          "Respond with one line per provided category.",
-          "Start the line with the name of the category, followed by a colon and the suggested keyword.",
-          "If you can't decide on a keyword, output `NA` for the respective category."
-        ),
-        user = paste0(
-          "# Rules:",
-          "{{rules}}", 
-          "# Text: ", 
-          "`{{text}}`"
-        )
-    )
-  ),
-  wait=10
-)
-
-```
-
-## Trouble Shooting
 
 ## Whats Next
 
-# Use data from the sotu package concerning the American State of the Union address
-#install.packages("sotu")
-library(sotu)
-sotu <- 
-  tibble(sotu_text) |> 
-  mutate(id = row_number()) |> 
-  rename(text = sotu_text) |> 
-  head(10)
+You can customize your prompts and vary different additional parameters. 
+See the customprompts vignette for examples and further explanation. 
+
+## Trouble Shooting
 
