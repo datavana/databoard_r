@@ -146,5 +146,3 @@ count(results, llm_result)
 You can customize your prompts and vary different additional parameters. 
 See the customprompts vignette for examples and further explanation. 
 
-## Trouble Shooting
-

@@ -63,13 +63,14 @@ results_multi <- llm_code(results_multi)
 View(results_multi)
 ```
 
+You can also build your own custom prompts using the llm_summarize function (see below).
+
 ### Additional options
 
 Additionally to the parameters the package supports a list of options that can be passed to the functions. These include the model choice, the temperature and the amount of preprocessing. 
 
 - **model**: Choose a LLM model. Supported models include ```'Llama-3.3-70B' (default)```, ```'mistral-small'```, ```'gemma-3-27b-it'```, ```'gemma-3'```, ```'gpt-oss-120b'```, ```'Apertus-8B-Instruct-2509'```. 
 - **temperature**: Overrides the server default which is (NOT_GIVEN)
-- **raw**: If true, returns the raw LLM output and by passes all task post-processing (default: false). 
 
 All these options can be called in the functions as follows:
 
@@ -85,85 +86,25 @@ View(results_options)
 
 ```
 
+## Custom Prompts for Coding
 
-
-
-```{r}
-
-Example for a coding task:
-
-{
-  "task": "coding",
-  "input": ["How is it going?", "Hello", "Sure!"],
-
-  "options": {
-      "rules": [
-          {"category":"A","description":"A question", "example":"Why?"},
-          {"category":"B","description":"An answer", "example":"Yes!"}
-      ],
-      "mode": "multi"
-  }
-}
-
-```
-
-## Custom Prompts
-
-Prompts: In the options, you can optionally define a custom prompt template name in the prompts key. The prompt template files matching the name must be available on the server. Alternatively, provide an object with the prompt text in the user and system values. The templates support the following keys in double curly bracket placeholders
-
-    {{text}}: Will be replaced by the input value.
-    {{rules}}: Will be replaced by the prepared codebook, annotation or summary rules. The databoard automatically prepares a markdown text representation of the rules.
-
-
-## Custom prompts
-
-In the simplest example, one prompt is generated for each case.
-You ingest your data by using the `{{text}}` placeholder.
-The result is added to the llm_result column of the data frame,
-ready for your post-processing routines.
+If you want to code and employing your own system prompt you can utilize the summary 
+workflow which gives you more adaptability. Simply insert your system prompt as a text string like 
+in the example below. Please note that you have to employ correct syntax (comma, quotation marks) for the code to work.
 
 ```{r}
-
-topics <- llm_prompt(
-  songs, text,
-  prompt.system = "Output a comma separated list of topics. Just the list, nothing else.",
-  prompt.user = "{{text}}",
-  wait=10
-)
-
-topics |>
-  separate_rows(llm_result, sep=", *") |>
-  count(llm_result, sort=T)
-
-```
-
-The following example uses a custom prompt. In contrast to the generic `llm_prompt()` method,
-the prompts are provided in the options, directly passed to the databoard API.
-Further, using the summary workflow, the databoard server post-processes the result to split it into one field for each category.
-
-```{r}
-
-
-
-rules <- tribble(
-   ~category,    ~description,
-   "genre", "The music genre",
-   "gender", "Gender of the artists",
-   "country", "The country where the song was written",
-   "year", "The year when the song was written"
-)
-
-categories <- llm_summarize(
-  songs, text, rules, 
+custom_results <- llm_summarize(
+  movies, abstract, rules, 
   options = list(
       prompts = list(
         system = c(
-          "Carefully read the provided rules and the text.",
-          "Determine for each category in the rules one keyword.",
-          "Respond with one line per provided category.",
-          "Start the line with the name of the category, followed by a colon and the suggested keyword.",
-          "If you can't decide on a keyword, output `NA` for the respective category."
-        ),
+                  "You are an expert in content analysis. Be precise and concise.",
+                  "Use the codebook provided to decide for each category, whether the text falls into the category.",
+                  "Please carefully read the text and determine for each category whether it applies.",
+                  "Return one line for each category. Each returned line must start with the category name", 
+                  "followed by a colon ':' and then followed by one of the codes '5' if the category strongly applies,",
+                  "'4' if it applies, '3' if you are unsure, '2' if it rather does not apply, and '1' if not at all.", 
+                  "Return only the lines for each category - nothing else, no introduction, no explanation, no disclaimer!"),
         user = paste0(
           "# Rules:",
           "{{rules}}", 
@@ -171,8 +112,33 @@ categories <- llm_summarize(
           "`{{text}}`"
         )
     )
-  ),
-  wait=10
+  )
 )
 
+custom_results <- llm_summarize(custom_results)
+
 ```
+
+Using the summary workflow, the databoard server post-processes the result to split it into one field for each category.
+
+## Custom prompts
+
+If you want full customability we provide a custom prompt template. If you simply want to customize your system prompt for the multi coding process we advise you to adapt the llm_summarize() function as shown above, since this also handles pre- and post-processing of the data (e.g. making multiple columns in your dataframe for each category).
+
+Within the llm_prompt function you can customize your prompt as follows:
+
+```{r}
+
+custom <- llm_prompt(
+  movies, abstract,
+  prompt.system = "Output a comma separated of coded categories. Just the list, nothing else. These are the possible categories': scifi, historical, drama, comedy, fantasy and romance",
+  prompt.user = "{{text}}"
+)
+
+custom <- llm_prompt(custom)
+
+print(custom$llm_result)
+```
+
+
+
