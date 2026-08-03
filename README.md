@@ -24,7 +24,7 @@ Databoard can be installed from source using the remotes package.
 ``` r
 
 library(remotes)
-remotes::install_github("datavana/databoard_r")
+remotes::install_github("datavana/databoard_r", build_manual = TRUE, build_vignettes = TRUE)
 ```
 
 To use the databoard service and the accompagnying package you need to

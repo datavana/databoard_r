@@ -20,13 +20,14 @@
 #' @param verbose Logical. If `TRUE`, subsequent API calls will print
 #'   additional diagnostic information. Stored in the environment variable
 #'   `DATABOARD_VERBOSE`.
-#'
+#' @param silent Logical. If `TRUE`, failing API calls will not stop processing further tasks.
+#'    Stored in the environment variable `DATABOARD_SILENT`.
 #' @return Invisibly returns `TRUE` on successful login and `FALSE` otherwise.
 #'   As a side effect, sets the environment variables `DATABOARD_SERVER`,
 #'   `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`.
 #'
 #' @export
-da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE) {
+da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE, silent = TRUE) {
 
   if (missing(username)) {
     if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
@@ -69,7 +70,8 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
     settings <- list(
       DATABOARD_SERVER      = server,
       DATABOARD_ACCESSTOKEN = accesstoken,
-      DATABOARD_VERBOSE     = verbose
+      DATABOARD_VERBOSE     = verbose,
+      DATABOARD_SILENT      = silent
     )
     do.call(Sys.setenv, settings)
 
@@ -85,7 +87,7 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
 #' Log out from the Databoard service
 #'
 #' Clears the environment variables set by [da_login()]
-#' (`DATABOARD_SERVER`, `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`),
+#' (`DATABOARD_SERVER`, `DATABOARD_ACCESSTOKEN`, `DATABOARD_VERBOSE`, and `DATABOARD_SILENT`),
 #' effectively ending the current session. Subsequent API calls will fail
 #' until [da_login()] is called again.
 #'
@@ -99,7 +101,8 @@ da_logout <- function() {
   Sys.unsetenv(c(
     "DATABOARD_SERVER",
     "DATABOARD_ACCESSTOKEN",
-    "DATABOARD_VERBOSE"
+    "DATABOARD_VERBOSE",
+    "DATABOARD_SILENT"
   ))
 
   message("Logged out, access token cleared from system environment.")
@@ -454,12 +457,15 @@ tasks_run_post <- function(task, input, options, wait = 0) {
 
   res <- da_request(endpoint, body, wait = wait)
 
-  status <- httr2::resp_status(res)
-  if (status < 200 || status >= 300) {
-    stop(
-      sprintf("Error: Task submission failed (status code %d).", status),
-      call. = FALSE
-    )
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+  if (!silent) {
+    status <- httr2::resp_status(res)
+    if (status < 200 || status >= 300) {
+      stop(
+        sprintf("Error: Task submission failed (status code %d).", status),
+        call. = FALSE
+      )
+    }
   }
 
   res
@@ -494,12 +500,15 @@ tasks_run_get <- function(task_id, wait = 0) {
   endpoint <- paste0("/tasks/run/", task_id)
   res <- da_request(endpoint, wait = wait)
 
-  status <- httr2::resp_status(res)
-  if (status < 200 || status >= 300) {
-    stop(
-      sprintf("Error: Fetching task result failed (status code %d).", status),
-      call. = FALSE
-    )
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+  if (!silent) {
+    status <- httr2::resp_status(res)
+    if (status < 200 || status >= 300) {
+      stop(
+        sprintf("Error: Fetching task result failed (status code %d).", status),
+        call. = FALSE
+      )
+    }
   }
 
   res
