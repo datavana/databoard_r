@@ -44,9 +44,8 @@ To try out the package you can use the internal dataframes *movies*, which conta
 library(remotes)
 remotes::install_github("datavana/databoard_r")
 
-# Load an example data frame from the package
-
-df <- databoard::movies # example data 
+# Load example data from the package
+df <- databoard::movies
 
 ```
 
@@ -117,6 +116,7 @@ The codebook needs to be structures into three columns:
 We have implemented a example codebook for the dataset movies called movie_rules.
 
 ```{r codebook}
+
 # Rule examples
 rules <- databoard::movies_rules
 
