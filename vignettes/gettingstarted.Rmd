@@ -13,7 +13,7 @@ editor_options:
 
 library(dplyr)
 library(tibble)
-knitr::opts_chunk$set(eval=F, include=T)
+knitr::opts_chunk$set(eval=FALSE, include=TRUE)
 ```
 
 ## Introduction to the databoard package
