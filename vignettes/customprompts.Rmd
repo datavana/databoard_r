@@ -38,8 +38,8 @@ da_login()
 
 ## Custom prompts
 
-You can use custom prompt templates and by-pass all post-processing to get direct LLM answers.
-using the `llm_prompt()` function. Provide your prompts in the `prompt.user`- and `prompt.system`-parameters.
+The datavana service is based on [precomposed prompts](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts) for the different workflows.
+You can override the default prompt templates and by-pass all post-processing to get direct LLM answers using the `llm_prompt()` function. Provide your prompts in the `prompt.user`- and `prompt.system`-parameters.
 
 In the prompts, for each case in the input data frame `df`,
 the placeholder `{{text}}` will be replaced 
@@ -128,8 +128,7 @@ custom_results <- llm_summarize(custom_results)
 
 ## Additional parameters
 
-We have implemented additional parameters to control the model choice (model, temperature),
-the job queue (wait-parameter) and the processing steps (mode-parameter).
+We have implemented additional parameters to control the model choice (model, temperature), the job queue (wait-parameter) and the processing steps (mode-parameter).
 
 ### Wait parameter
 
