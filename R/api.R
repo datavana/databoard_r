@@ -263,7 +263,7 @@ da_extract <- function(data, resp, no) {
   if (!is.null(body$state)) {
     data$.task_state[no] <- body$state
   } else {
-    data$.task_state[no] <- paste0("Code ", statuscode)
+    data$.task_state[no] <- paste0("CODE ", statuscode)
   }
 
   answers <- body$result$answers
