@@ -14,7 +14,7 @@ License: MIT + file LICENSE
 URL: https://databoard.uni-muenster.de/
 BugReports: https://github.com/datavana/databoard_r/issues
 Depends:
-    R (>= 3.6.0)
+    R (>= 4.1.0)
 Imports:
     cli,
     dplyr,
