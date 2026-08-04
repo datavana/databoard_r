@@ -14,3 +14,23 @@ STATE_COLORS <- list(
   STARTED = cli::col_cyan,
   REVOKED = cli::col_silver
 )
+
+
+DATABOARD_MAXRETRIES <- 3L
+
+
+#
+# Option handling
+#
+
+.onLoad <- function(libname, pkgname) {
+  op <- options()
+  op.databoard <- list(
+    databoard.baseurl     = DATABOARD_BASEURL,
+    databoard.max_retries = DATABOARD_MAXRETRIES
+  )
+  toset <- !(names(op.databoard) %in% names(op))
+  if (any(toset)) options(op.databoard[toset])
+  invisible()
+}
+

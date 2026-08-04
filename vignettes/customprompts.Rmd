@@ -49,7 +49,7 @@ by the content of the selected `abstract` column.
 ```{r}
 
 # Submit tasks
-result <- llm_prompt(
+results <- llm_prompt(
   df, abstract,
   
   prompt.system = paste0(
@@ -64,7 +64,7 @@ result <- llm_prompt(
 
 
 # Fetch results
-result <- llm_prompt(custom)
+results <- llm_prompt(custom)
 
 ```
 

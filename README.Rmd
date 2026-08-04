@@ -87,7 +87,7 @@ results <- llm_code(movies, abstract, rules)
 # Once you submitted your tasks, 
 # call the same method with  your data frame as the first parameter.
 # Task results that are ready will be added.
-# Keep calling until all result are finished.
+# Keep calling until all tasks are finished.
 results <- llm_code(results)
 
 # Inspect result

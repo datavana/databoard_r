@@ -27,7 +27,7 @@
 #'   `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`.
 #'
 #' @export
-da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE, silent = TRUE) {
+da_login <- function(username, password, server = getOption("databoard.baseurl", DATABOARD_BASEURL), verbose = FALSE, silent = TRUE) {
 
   if (missing(username)) {
     if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
@@ -242,8 +242,19 @@ da_extract <- function(data, resp, no) {
     data$.task_result <- NA
   }
 
-  body <- httr2::resp_body_json(resp, simplifyVector = TRUE)
   statuscode <- httr2::resp_status(resp)
+
+  # Only try to parse JSON if the server actually returned JSON.
+  # For example, on HTTP errors the body may be an HTML error page.
+  body <- NULL
+  if (httr2::resp_has_body(resp) &&
+      grepl("json", httr2::resp_content_type(resp), fixed = TRUE)) {
+    body <- tryCatch(
+      httr2::resp_body_json(resp, simplifyVector = TRUE),
+      error = function(e) NULL
+    )
+  }
+
 
   if (!is.null(body$task_id)) {
     data$.task_id[no] <- body$task_id
@@ -414,6 +425,10 @@ da_request <- function(endpoint, body, wait = 0) {
     req <- httr2::req_body_json(req, body)
   }
 
+  # Don't stop at HTTP errors, retry after rate limits
+  req <- req |>
+    httr2::req_retry(max_tries = getOption("databoard.maxretries", DATABOARD_MAXRETRIES)) |>
+    httr2::req_error(is_error = function(resp) FALSE)
 
   httr2::req_perform(req)
 

@@ -67,6 +67,7 @@ when working on a shared computer, always remember to close the application or l
 
 # Login into the databoard service.
 # You will be asked to provide username and password.
+# See  the help of the function for alternatives to provide your credentials.
 da_login() 
 
 # Logout of the databoard service
@@ -132,7 +133,7 @@ results <- llm_code(df, abstract, rules)
 # Once you submitted your tasks, call the same method with
 # your data frame as the first parameter
 # Task results that are ready will be added.
-# Keep calling until all result are finished.
+# Keep calling until all tasks are finished.
 results <- llm_code(results)
 
 # Inspect result
