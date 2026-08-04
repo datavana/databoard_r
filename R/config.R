@@ -5,7 +5,7 @@
 DATABOARD_BASEURL <- "https://databoard.uni-muenster.de"
 
 
-# Colour palette for known states; fallback to white
+# Colour palette for known states
 STATE_COLORS <- list(
   SUCCESS = cli::col_green,
   PENDING = cli::col_yellow,

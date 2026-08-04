@@ -166,7 +166,7 @@ da_submit <- function(data, col, task, options, wait = 0) {
 #'
 #' Iterates over rows of `data` and retrieves results for any task that is
 #' still in the `PENDING` state. Newly received results overwrite the
-#' corresponding row's `.task_state` and `.task_result` values, and are
+#' corresponding rows' `.task_state` and `.task_result` values, and are
 #' unnested into regular columns.
 #'
 #' @param data A data frame previously produced by [da_submit()]. Must contain
@@ -358,7 +358,7 @@ da_progress <- function(data, message = FALSE) {
       n       <- state_counts[[state]]
       pct     <- if (total > 0) n / total * 100 else 0
       label   <- if (is.na(state) || is.null(state)) "NA" else state
-      colorfn <- STATE_COLORS[[label]] %||% cli::col_white
+      colorfn <- STATE_COLORS[[label]] %||% cli::col_black
       colorfn(sprintf("%.0f%% %s", pct, label))
     }, character(1))
 
