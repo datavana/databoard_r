@@ -13,6 +13,8 @@ editor_options:
 
 library(dplyr)
 library(tibble)
+library(tidyr)
+
 knitr::opts_chunk$set(eval=FALSE, include=TRUE)
 ```
 
@@ -31,7 +33,7 @@ The R package wraps the main functions of the service:
 - `llm_code()` assigns predefined categories to a text. 
    Provide a codebook with category names, descriptions, and optionally examples. 
    Depending on your settings, the workflow will return one or multiple matching categories. 
-- `llm_anno()` (not implemented yet) adds in-text annotations, for example, to extract person or place names.
+- `llm_annotate()` adds in-text annotations, for example, to extract person or place names.
    According to your rule set, the matching text segments are enclosed in XML tags.
 
 The predefined methods are based on pre-composed prompt templates and include pre- and post-processing steps aligned to the workflow. You can customize the prompts and several other options exposed by the service.
@@ -44,7 +46,7 @@ To gain full flexibility, use custom prompts and by-pass the processing steps:
 
 The Databoard package can be installed from source using the remotes package. 
 
-```{r data}
+```{r}
 
 library(remotes)
 remotes::install_github("datavana/databoard_r")
@@ -60,7 +62,7 @@ which contains four columns:
 - abstract: a short abstract, for example, to try genre detection using the coding workflow
 - review: a longer review, for example, to try the summary workflow
 
-```{r data}
+```{r}
 
 # Load example data from the package
 df <- databoard::movies
@@ -78,10 +80,10 @@ The `da_login()` method stores your access token invisibly in the system environ
 The login lasts until you close R or log out of the service. 
 Please, when working on a shared computer, always remember to close the application or log out.  
 
-```{r login}
+```{r}
 
 # Log into the Databoard service.
-da_login() 
+da_login()
 
 # Log out of the Databoard service
 da_logout()
@@ -95,7 +97,7 @@ See the function help for alternative ways to provide your credentials.
 
 In our example dataframe `movies` we have a column `review` which features lengthy reviews of the movies' plots. To summarize them into shorter paragraphs, use `llm_summarize()` and pass the data frame and the name of the column containing the review text.
 
-```{r summarize}
+```{r}
 
 # Submit the tasks to the Databoard queue
 results <- llm_summarize(df, review)
@@ -109,7 +111,6 @@ results <- llm_summarize(results, wait = 10)
 ```
 
 Within RStudio, inspect the `results` object to see the answers.
-
 
 
 ## Using the service to categorize text
@@ -133,16 +134,24 @@ or prepare and load it from a csv or excel file with common tidyverse functions.
 We have implemented an example codebook that can be used for playing with the example
 movies dataset:
 
-```{r codebook}
+```{r}
 
 # Rule examples
-rules <- databoard::movies_rules
+rules <-tibble::tribble(
+  ~category,  ~description,                                                               ~example,
+  "History",  "Movies based on real events or people from the past.",                     "Schindler’s List, Braveheart",
+  "Scifi",    "Stories about futuristic science, technology, space, or alien life.",      "Interstellar, Blade Runner",
+  "Musical",  "Films where characters sing and dance as part of the story.",              "The Greatest Showman, Mamma Mia",
+  "Fantasy",  "Movies featuring magical or supernatural elements and imaginary worlds.",  "Pan’s Labyrinth, Harry Potter",
+  "Comedy",   "Films made to entertain and make the audience laugh.",                     "Mean Girls, The Hangover",
+  "Drama",    "Serious stories focused on relationships, and character development.",     "Forrest Gump, A Beautiful Mind"
+)
 
 ```
 
 Once you have data and rules, let the LLM categorize your text:
 
-```{r code}
+```{r}
 
 # Submit
 results <- llm_code(df, abstract, rules)
@@ -155,9 +164,63 @@ count(results, llm_result)
 
 ```
 
+What about movies that fall into multiple categories? Try it out! 
+Set the mode-parameter to "multi" and obtain a value between 0 to 2 for each category:
+
+
+```{r}
+
+# Submit
+results <- llm_code(df, abstract, rules, mode="multi")
+
+# Keep calling until all tasks are finished.
+results <- llm_code(results)
+
+
+```
+
+
+## Using the service to annotate text
+
+Use `llm_annotate()` to extract and annotate text spans according to rules.
+The rules object is mandatory in submit mode and must provide three columns:
+
+- `category`: used as `value` attribute in the annotation
+- `description`: used to identify text segments
+- `example`: comma-separated example segments that match the rule
+
+The result contains the matching text segment wrapped in XML-tags.
+
+```{r}
+
+anno_rules <- tibble::tribble(
+  ~category, ~description, ~example,
+  "PERSON", "Names of people", "John Doe, Jane Roe",
+  "PLACE", "Names of places", "Berlin, New York"
+)
+
+# Submit
+results <- llm_annotate(df, abstract, anno_rules)
+
+# Fetch pending tasks
+results <- llm_annotate(results)
+
+
+```
+
+In addition, you will find a `llm_annos` column containing a data frame 
+with the extracted segments for each case. Unnest them to get a simple 
+data frame:
+
+```{r}
+
+segments <- results |> 
+  select(id, name, llm_annos) |> 
+  tidyr::unnest(llm_annos)
+
+```
+
 ## What's next?
 
-Customize your prompts and additional model parameters.
-See the customprompts vignette for examples and further explanation. 
-
-
+Customize your prompts and learn about additional model parameters in the 
+customprompts vignette.

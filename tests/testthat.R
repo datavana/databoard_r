@@ -7,7 +7,7 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(databoard_r)
+library(databoard)
 
-test_check("databoard_r")
+test_check("databoard")
 

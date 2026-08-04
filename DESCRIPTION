@@ -23,7 +23,8 @@ Imports:
     progress,
     purrr,
     tibble,
-    tidyr
+    tidyr,
+    xml2
 Suggests:
     knitr,
     rmarkdown,

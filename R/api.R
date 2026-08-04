@@ -317,6 +317,13 @@ da_unnest <- function(data) {
     out[[cols[i]]] <- NULL
   }
 
+  if ("llm_result" %in% colnames(out)) {
+    has_anno_tags <- any(!is.na(out$llm_result) & grepl("<anno\\b", out$llm_result, perl = TRUE))
+    if (has_anno_tags) {
+      out$llm_annos <- lapply(out$llm_result, extract_annos)
+    }
+  }
+
   dplyr::relocate(
     out,
     dplyr::any_of(c(".task_id", ".task_state")),
@@ -528,4 +535,3 @@ tasks_run_get <- function(task_id, wait = 0) {
 
   res
 }
-

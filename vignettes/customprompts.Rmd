@@ -2,7 +2,7 @@
 title: "Use custom prompts and additional parameters"
 output: html_document
 vignette: >
-  %\VignetteIndexEntry{Getting Started}
+  %\VignetteIndexEntry{Custom Prompts}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -74,8 +74,8 @@ This serves readability, alternatively, you can provide the prompt as one single
 ## Adapt prompts for the existing workflow methods
 
 Instead of using the `llm_prompt()`-function, you can also adapt the prompts
-used by the workflow-specific functions `llm_summarize()`,  `llm_code()` or `llm_anno()`. 
-Using this technique, you can leverage the pre- and post-processing steps of the Databoard service. 
+used by the workflow-specific functions `llm_summarize()`,  `llm_code()` or `llm_annotate()`.
+Using this technique, you can leverage the pre- and post-processing steps of the Databoard service.
 For example, when providing rules, the result is automatically split it into one field for each category. By the way: under the hood, the `llm_prompt()` function uses the summary workflow with settings that simply disable result processing.
 
 In your prompt templates, use the `{{text}}` placeholder to define the slot where the content of your data frame will be inserted. 
@@ -146,19 +146,22 @@ results <- llm_summarize(df, review, wait = 10)
 
 ### Mode parameter
 
-The coding  workflow has multiple modes to process the data. These modes describe different system prompts (see [here](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts) for the exact prompts). We differentiate between:
+Some workflows can return multiple values per case, for example when coding text with multiple categories
+or when summarizing text with multiple rules.
 
-- single mode (default): categorizes each text into the most appropriate category 
-- multi mode: Determines for each category whether it strongly applies (2), applies (1) or does not apply.
+Only `llm_code()` exposes an explicit `mode` argument.
+It controls how the coding result is structured:
+
+- `single` (default): return the single best-matching category per case.
+- `multi`: return one value per category, where `2` means the category strongly applies, `1` means it applies, and `0` means it does not apply.
 
 ```{r}
-# Coding Single Mode (default)
+# Single mode (default)
 
-results <- llm_code(df, abstract, rules)
+results <- llm_code(df, abstract, rules, mode = "single")
 results <- llm_code(results)
-count(results, llm_result)
 
-# Coding Multi Mode
+# Multi mode
 
 results <- llm_code(df, abstract, rules, mode = "multi")
 results <- llm_code(results)
@@ -166,14 +169,34 @@ results <- llm_code(results)
 ```
 
 
+The `llm_summarize()` method uses the same idea internally, but switches automatically: 
+with `rules` it returns one result per rule, otherwise it returns a single summary per case. A typical use case for multi-mode is extracting information such as a movie's year, the topic or the main character's name. Example:
+
+```{r}
+
+rules <- tibble::tribble(
+  ~category,  ~description,                                  ~example,
+  "figure",   "The names of the main characters in the movie", "John Doe",
+  "gender",   "The gender of the main characters",             "male"
+)
+
+results <- llm_summarize(df, abstract, rules)
+results <- llm_summarize(results)
+```
+
+
 ### Model parameters
 
-Additionally to the parameters the package supports a list of options that can be passed to the functions. These include the model choice, the temperature and the amount of preprocessing. 
+The workflow wrappers forward model-related settings via the `options` list.
+The most common ones are:
 
-- **model**: Choose a LLM model. Supported models include ```'Llama-3.3-70B' (default)```, ```'mistral-small'```, ```'gemma-3-27b-it'```, ```'gemma-3'```, ```'gpt-oss-120b'```, ```'Apertus-8B-Instruct-2509'```. 
-- **temperature**: Overrides the server default which is (NOT_GIVEN)
+- **model**: choose the LLM model to use.
+- **temperature**: control how deterministic or varied the answer should be.
 
-All these options can be called in the functions as follows:
+See the databoard [API documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post) for a complete list of available options and their values.
+If you do not set these options, the server defaults are used.
+
+For example:
 
 ```{r}
 
