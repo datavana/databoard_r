@@ -38,8 +38,7 @@ The predefined methods are based on pre-composed prompt templates and include pr
 
 To gain full flexibility, use custom prompts and by-pass the processing steps:
 
-- `llm_prompt()` fetches LLM answers using your own prompt templates. Under the hood, it uses the summary workflow with settings that disable result processing.
-
+- `llm_prompt()` fetches LLM answers using your own prompt templates. 
 
 ## Install the package and get example data
 

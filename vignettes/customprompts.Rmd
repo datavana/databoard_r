@@ -1,5 +1,5 @@
 ---
-title: "Create custom prompts and include additional parameters"
+title: "Use custom prompts and additional parameters"
 output: html_document
 vignette: >
   %\VignetteIndexEntry{Getting Started}
@@ -71,15 +71,14 @@ results <- llm_prompt(custom)
 *Note:* In the previous example, we used `paste0()` to concatenate the sentences. 
 This serves readability, alternatively, you can provide the prompt as one single character string.
 
-
 ## Adapt prompts for the existing workflow methods
 
 Instead of using the `llm_prompt()`-function, you can also adapt the prompts
-used by the workflow-specific functions such as `llm_summarize()` or `llm_code()`.
+used by the workflow-specific functions `llm_summarize()`,  `llm_code()` or `llm_anno()`. 
 Using this technique, you can leverage the pre- and post-processing steps of the Databoard service. 
-For example, when providing rules, the result is automatically split it into one field for each category.
+For example, when providing rules, the result is automatically split it into one field for each category. By the way: under the hood, the `llm_prompt()` function uses the summary workflow with settings that simply disable result processing.
 
-Use the `{{text}}` placeholder to define the slot where the content of your data frame will be inserted. 
+In your prompt templates, use the `{{text}}` placeholder to define the slot where the content of your data frame will be inserted. 
 
 The `{{rules}}` placeholder will be replaced by a markdown formatted list of all the rules provided in the rules book. When using rules, make sure your prompt is compatible with the expected pattern. 
 The post-processing procedure expects one line for each output column. 
@@ -90,7 +89,7 @@ To enter line breaks into a prompt, use the escape sequence `\n`.
 
 ```{r}
 
-custom_results <- llm_summarize(
+results <- llm_summarize(
   movies, abstract, rules, 
   
   options = list(
@@ -120,7 +119,7 @@ custom_results <- llm_summarize(
    )
 )
 
-custom_results <- llm_summarize(custom_results)
+results <- llm_summarize(results)
 
 ```
 
@@ -155,18 +154,17 @@ The coding  workflow has multiple modes to process the data. These modes describ
 ```{r}
 # Coding Single Mode (default)
 
-results_single <- llm_code(df, abstract, rules)
-results_single <- llm_code(results_single)
-count(results_single, llm_result)
+results <- llm_code(df, abstract, rules)
+results <- llm_code(results)
+count(results, llm_result)
 
 # Coding Multi Mode
 
-results_multi <- llm_code(df, abstract, rules, mode = "multi")
-results_multi <- llm_code(results_multi)
+results <- llm_code(df, abstract, rules, mode = "multi")
+results <- llm_code(results)
 
 ```
 
-You can also build your own custom prompts using the llm_summarize function (see below).
 
 ### Model parameters
 
@@ -178,14 +176,16 @@ Additionally to the parameters the package supports a list of options that can b
 All these options can be called in the functions as follows:
 
 ```{r}
-results_options <- llm_code(
+
+results <- llm_code(
   df, abstract, rules, 
+  
   options = list(
     model = 'mistral-small',
     temperature = "2"
   )
 )
 
-results_options <- llm_code(results_options)
+results <- llm_code(results)
 
 ```
