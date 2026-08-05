@@ -205,7 +205,7 @@ results <- llm_code(
   
   options = list(
     model = 'mistral-small',
-    temperature = "2"
+    temperature = "0.2"
   )
 )
 
