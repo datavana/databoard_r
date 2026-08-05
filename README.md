@@ -4,18 +4,17 @@
 # Databoard-Package
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The databoard package is designed to interface with the databoard
 service, enabling automated content coding via large language models.
-The service is hosted by the Department of Communication at the
-University of Münster and leverages the internally available model
-Mixtral 8x7B.
 
 The primary purpose of this package is to streamline work in R: by
 providing a minimal set of intuitive functions, it simplifies the
-process of submitting content for analysis and retrieving coded output —
-reducing setup overhead and facilitating reproducible workflows.
+process of submitting content for analysis and retrieving structured
+output — reducing setup overhead and facilitating reproducible
+workflows.
 
 ## How to install the databoard package?
 
@@ -27,14 +26,14 @@ library(remotes)
 remotes::install_github("datavana/databoard_r", build_manual = TRUE, build_vignettes = TRUE)
 ```
 
-To use the databoard service and the accompagnying package you need to
-have credentials. Please contact the [Digital Media and Computational
+To use the databoard service you need credentials. Please contact the
+[Digital Media and Computational
 Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml)
 research unit to obtain a username and password.
 
-Once you have your credentials which consists of a username and a
-password you can log into the service. The `da_login()`method prompts
-for your credentials (alternatively, provide them in the parameters).
+Once you have credentials, you can log into the service. The
+`da_login()`method prompts for the username and the password
+(alternatively, provide them in the parameters).
 
 ``` r
 
@@ -52,7 +51,7 @@ The service provides three main functions:
 
 - code text
 - summarize text
-- annotate text (work in progress)
+- annotate text
 
 ``` r
 
