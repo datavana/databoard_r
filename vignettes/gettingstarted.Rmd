@@ -137,7 +137,7 @@ movies dataset:
 ```{r}
 
 # Rule examples
-rules <-tibble::tribble(
+rules <- tibble::tribble(
   ~category,  ~description,                                                               ~example,
   "History",  "Movies based on real events or people from the past.",                     "Schindler’s List, Braveheart",
   "Scifi",    "Stories about futuristic science, technology, space, or alien life.",      "Interstellar, Blade Runner",

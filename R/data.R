@@ -13,3 +13,18 @@
 #' }
 #' #' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
 "movies"
+
+#' Movie genre descriptions
+#'
+#' A rule set for coding genres
+#'
+#'
+#' @format ## `genres`
+#' A data frame with 6 rows and 3 columns:
+#' \describe{
+#'   \item{category}{The genre name}
+#'   \item{description}{Definition ot the genre.}
+#'   \item{example}{Example movies}
+#' }
+#' #' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
+"genres"

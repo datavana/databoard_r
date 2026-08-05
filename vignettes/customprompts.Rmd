@@ -29,7 +29,7 @@ library(databoard)
 
 # Load example data
 df <- databoard::movies
-rules <- databoard::movies_rules
+rules <- databoard::genres
 
 # Login
 da_login()

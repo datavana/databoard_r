@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Databoard-Package
+# Databoard Package
 
 <!-- badges: start -->
 
@@ -59,7 +59,19 @@ library(tidyverse)
 
 # Get example data
 df <- databoard::movies
-rules <- databoard::movies_rules
+
+# Define coding rules
+rules <- tibble::tribble(
+  ~category,  ~description,                                                               ~example,
+  "History",  "Movies based on real events or people from the past.",                     "Schindler’s List, Braveheart",
+  "Scifi",    "Stories about futuristic science, technology, space, or alien life.",      "Interstellar, Blade Runner",
+  "Musical",  "Films where characters sing and dance as part of the story.",              "The Greatest Showman, Mamma Mia",
+  "Fantasy",  "Movies featuring magical or supernatural elements and imaginary worlds.",  "Pan’s Labyrinth, Harry Potter",
+  "Comedy",   "Films made to entertain and make the audience laugh.",                     "Mean Girls, The Hangover",
+  "Drama",    "Serious stories focused on relationships, and character development.",     "Forrest Gump, A Beautiful Mind"
+)
+
+write_rds(rules,"data/genres.rda")
 
 # Submit to the databoard service
 results <- llm_code(movies, abstract, rules)
