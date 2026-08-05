@@ -146,8 +146,9 @@ da_submit <- function(data, col, task, options, wait = 0) {
   n <- length(input)
   pb <- progress::progress_bar$new(
     format = "Submitting tasks [:bar] :current/:total (:percent)",
-    total  = n, clear  = FALSE, width  = 60
+    total  = n, clear  = FALSE, width  = 60, show_after = 0,
   )
+  pb$tick(0)
 
   # Main loop
   for (i in seq_len(n)) {
@@ -194,8 +195,9 @@ da_fetch <- function(data, wait = 10) {
   n <- nrow(data)
   pb <- progress::progress_bar$new(
     format = "Fetching task results [:bar] :current/:total (:percent)",
-    total  = n, clear  = FALSE, width  = 60
+    total  = n, clear  = FALSE, width  = 60, show_after = 0,
   )
+  pb$tick(0)
 
   # Main loop
   for (i in seq_len(n)) {
