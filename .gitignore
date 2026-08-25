@@ -12,6 +12,4 @@ private
 cache/
 *_cache/
 docs
-tests/testthat/
-tests
 man

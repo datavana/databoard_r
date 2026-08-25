@@ -1,6 +1,8 @@
 #' Movie Dataset
 #'
+
 #' A fabricated data set containing information about different movies
+
 #'
 #'
 #' @format ## `movies`
@@ -11,24 +13,21 @@
 #'   \item{abstract}{A short abstract, imagined from chatgpt based on the movie title}
 #'   \item{year}{A review of the movie, imagined from chatgtp based on the movie title}
 #' }
-#' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
-#'
-#' @name movies
-NULL
 
-#' Movie Codebook
+#' #' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
+"movies"
+
+#' Movie genre descriptions
 #'
-#' An example codebook for the movies dataset
+#' A rule set for coding genres
 #'
 #'
-#' @format ## `movies_rules`
+#' @format ## `genres`
 #' A data frame with 6 rows and 3 columns:
 #' \describe{
-#'   \item{category}{A category for coding featuring different movie genres}
-#'   \item{description}{A description of the category to be coded}
-#'   \item{example}{An example of code that should be coded within this category}
+#'   \item{category}{The genre name}
+#'   \item{description}{Definition ot the genre.}
+#'   \item{example}{Example movies}
 #' }
-#' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
-#'
-#' @name movies_rules
-NULL
+#' #' @source Communication Department of the University of Münster (<k.maubach@uni-muenster.de> and <jakob.juenger@uni-muenster.de>).
+"genres"

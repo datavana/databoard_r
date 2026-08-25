@@ -316,3 +316,95 @@ llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
   da_submit(data, {{ col }}, "summarize", options, wait)
 
 }
+
+#' Automated annotation with an LLM
+#'
+#' Submits each row of `data` to the Databoard `annotate` task, which asks an
+#' LLM to annotate the text in `col` using `rules`. The server post-processes
+#' the answer and returns tabular output columns.
+#'
+#' The function has two modes of operation, dispatched automatically:
+#'
+#' * **Submit** - if `data` does *not* yet contain a `.task_id` column, the
+#'   texts in `col` are submitted as new annotation tasks (via [da_submit()]).
+#' * **Fetch** - if `data` already contains a `.task_id` column (i.e. it was
+#'   previously returned by `llm_annotate()`), the function fetches results for
+#'   any tasks that are still pending (via [da_fetch()]). In this case,
+#'   all other parameters are ignored.
+#'
+#' To customize prompts, pass `options$prompts$system` and/or
+#' `options$prompts$user`.
+#'
+#' @param data A data frame containing the texts to be annotated, or a data
+#'   frame previously returned by `llm_annotate()` whose pending results should be
+#'   fetched.
+#' @param col A column in `data` holding the input text. Tidy-evaluation is
+#'   supported (pass the bare column name).
+#' @param rules Required in submit mode. A data frame that is converted to an
+#'   array of dicts with keys `category`, `description`, and `example`.
+#'   The `description` is used to identify text segments. The `example` should
+#'   contain comma-separated text segments that match the rule. The `category`
+#'   is used as the `value` attribute in the annotation output.
+#' @param options A named list of additional options passed to the Databoard
+#'   server. See the databoad server documentation for available options.
+#' @param wait Integer. Seconds to wait server-side per case for the task to
+#'   complete before returning.
+#'   * `0` (default): submit all tasks and return immediately with state
+#'     `PENDING`. Fetch results later by calling `llm_annotate(data)` again.
+#'   * `> 0`: wait up to that many seconds per case for the result.
+#' @return The input data frame with the columns `.task_id` and `.task_state`
+#'   added. When results are available, they are unnested into additional
+#'   result columns (e.g. `llm_result`). For annotation tasks, `llm_annos`
+#'   is added as a list-column with one data frame per case containing
+#'   `value` and `segment`.
+#'
+#' @seealso [llm_prompt()], [llm_code()], [llm_summarize()], [da_submit()], [da_fetch()]
+#'
+#' @examples
+#' \dontrun{
+#' anno_rules <- tibble::tribble(
+#'   ~category, ~description, ~example,
+#'   "PERSON", "Names of people", "John Doe, Jane Roe",
+#'   "PLACE", "Names of places", "Berlin, New York"
+#' )
+#'
+#' # Submit
+#' results <- llm_annotate(movies, abstract, anno_rules)
+#'
+#' # Fetch pending tasks
+#' results <- llm_annotate(results)
+#'
+#' # Inspect annotations
+#' head(results$llm_result)
+#' results$llm_annos[[1]]
+#' }
+#'
+#' @export
+llm_annotate <- function(data, col, rules, options = list(), wait = 0) {
+
+  if (".task_id" %in% colnames(data)) {
+    return (da_fetch(data))
+  }
+
+  if (missing(rules) || is.null(rules)) {
+    stop("Error: rules are required in submit mode.", call. = FALSE)
+  }
+
+  required_cols <- c("category", "description", "example")
+  if (!is.data.frame(rules) || !all(required_cols %in% colnames(rules))) {
+    stop("Error: rules must be a data frame with columns: category, description, example.", call. = FALSE)
+  }
+
+  options$rules <- purrr::transpose(rules[required_cols])
+
+  if (!is.null(options$prompts$system)) {
+    options$prompts$system <- paste0(options$prompts$system, collapse = "\n")
+  }
+  if (!is.null(options$prompts$user)) {
+    options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
+  }
+
+  da_submit(data, {{ col }}, "annotate", options, wait)
+
+}
+

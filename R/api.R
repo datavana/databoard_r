@@ -20,13 +20,14 @@
 #' @param verbose Logical. If `TRUE`, subsequent API calls will print
 #'   additional diagnostic information. Stored in the environment variable
 #'   `DATABOARD_VERBOSE`.
-#'
+#' @param silent Logical. If `TRUE`, failing API calls will not stop processing further tasks.
+#'    Stored in the environment variable `DATABOARD_SILENT`.
 #' @return Invisibly returns `TRUE` on successful login and `FALSE` otherwise.
 #'   As a side effect, sets the environment variables `DATABOARD_SERVER`,
 #'   `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`.
 #'
 #' @export
-da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = FALSE) {
+da_login <- function(username, password, server = getOption("databoard.baseurl", DATABOARD_BASEURL), verbose = FALSE, silent = TRUE) {
 
   if (missing(username)) {
     if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
@@ -69,7 +70,8 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
     settings <- list(
       DATABOARD_SERVER      = server,
       DATABOARD_ACCESSTOKEN = accesstoken,
-      DATABOARD_VERBOSE     = verbose
+      DATABOARD_VERBOSE     = verbose,
+      DATABOARD_SILENT      = silent
     )
     do.call(Sys.setenv, settings)
 
@@ -85,7 +87,7 @@ da_login <- function(username, password, server = DATABOARD_BASEURL, verbose = F
 #' Log out from the Databoard service
 #'
 #' Clears the environment variables set by [da_login()]
-#' (`DATABOARD_SERVER`, `DATABOARD_ACCESSTOKEN`, and `DATABOARD_VERBOSE`),
+#' (`DATABOARD_SERVER`, `DATABOARD_ACCESSTOKEN`, `DATABOARD_VERBOSE`, and `DATABOARD_SILENT`),
 #' effectively ending the current session. Subsequent API calls will fail
 #' until [da_login()] is called again.
 #'
@@ -99,7 +101,8 @@ da_logout <- function() {
   Sys.unsetenv(c(
     "DATABOARD_SERVER",
     "DATABOARD_ACCESSTOKEN",
-    "DATABOARD_VERBOSE"
+    "DATABOARD_VERBOSE",
+    "DATABOARD_SILENT"
   ))
 
   message("Logged out, access token cleared from system environment.")
@@ -143,8 +146,9 @@ da_submit <- function(data, col, task, options, wait = 0) {
   n <- length(input)
   pb <- progress::progress_bar$new(
     format = "Submitting tasks [:bar] :current/:total (:percent)",
-    total  = n, clear  = FALSE, width  = 60
+    total  = n, clear  = FALSE, width  = 60, show_after = 0,
   )
+  pb$tick(0)
 
   # Main loop
   for (i in seq_len(n)) {
@@ -163,7 +167,7 @@ da_submit <- function(data, col, task, options, wait = 0) {
 #'
 #' Iterates over rows of `data` and retrieves results for any task that is
 #' still in the `PENDING` state. Newly received results overwrite the
-#' corresponding row's `.task_state` and `.task_result` values, and are
+#' corresponding rows' `.task_state` and `.task_result` values, and are
 #' unnested into regular columns.
 #'
 #' @param data A data frame previously produced by [da_submit()]. Must contain
@@ -191,8 +195,9 @@ da_fetch <- function(data, wait = 10) {
   n <- nrow(data)
   pb <- progress::progress_bar$new(
     format = "Fetching task results [:bar] :current/:total (:percent)",
-    total  = n, clear  = FALSE, width  = 60
+    total  = n, clear  = FALSE, width  = 60, show_after = 0,
   )
+  pb$tick(0)
 
   # Main loop
   for (i in seq_len(n)) {
@@ -239,8 +244,19 @@ da_extract <- function(data, resp, no) {
     data$.task_result <- NA
   }
 
-  body <- httr2::resp_body_json(resp, simplifyVector = TRUE)
   statuscode <- httr2::resp_status(resp)
+
+  # Only try to parse JSON if the server actually returned JSON.
+  # For example, on HTTP errors the body may be an HTML error page.
+  body <- NULL
+  if (httr2::resp_has_body(resp) &&
+      grepl("json", httr2::resp_content_type(resp), fixed = TRUE)) {
+    body <- tryCatch(
+      httr2::resp_body_json(resp, simplifyVector = TRUE),
+      error = function(e) NULL
+    )
+  }
+
 
   if (!is.null(body$task_id)) {
     data$.task_id[no] <- body$task_id
@@ -249,7 +265,7 @@ da_extract <- function(data, resp, no) {
   if (!is.null(body$state)) {
     data$.task_state[no] <- body$state
   } else {
-    data$.task_state[no] <- paste0("Code ", statuscode)
+    data$.task_state[no] <- paste0("CODE ", statuscode)
   }
 
   answers <- body$result$answers
@@ -303,6 +319,13 @@ da_unnest <- function(data) {
     out[[cols[i]]] <- NULL
   }
 
+  if ("llm_result" %in% colnames(out)) {
+    has_anno_tags <- any(!is.na(out$llm_result) & grepl("<anno\\b", out$llm_result, perl = TRUE))
+    if (has_anno_tags) {
+      out$llm_annos <- lapply(out$llm_result, extract_annos)
+    }
+  }
+
   dplyr::relocate(
     out,
     dplyr::any_of(c(".task_id", ".task_state")),
@@ -344,7 +367,7 @@ da_progress <- function(data, message = FALSE) {
       n       <- state_counts[[state]]
       pct     <- if (total > 0) n / total * 100 else 0
       label   <- if (is.na(state) || is.null(state)) "NA" else state
-      colorfn <- STATE_COLORS[[label]] %||% cli::col_white
+      colorfn <- STATE_COLORS[[label]] %||% cli::col_black
       colorfn(sprintf("%.0f%% %s", pct, label))
     }, character(1))
 
@@ -411,6 +434,10 @@ da_request <- function(endpoint, body, wait = 0) {
     req <- httr2::req_body_json(req, body)
   }
 
+  # Don't stop at HTTP errors, retry after rate limits
+  req <- req |>
+    httr2::req_retry(max_tries = getOption("databoard.maxretries", DATABOARD_MAXRETRIES)) |>
+    httr2::req_error(is_error = function(resp) FALSE)
 
   httr2::req_perform(req)
 
@@ -454,12 +481,15 @@ tasks_run_post <- function(task, input, options, wait = 0) {
 
   res <- da_request(endpoint, body, wait = wait)
 
-  status <- httr2::resp_status(res)
-  if (status < 200 || status >= 300) {
-    stop(
-      sprintf("Error: Task submission failed (status code %d).", status),
-      call. = FALSE
-    )
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+  if (!silent) {
+    status <- httr2::resp_status(res)
+    if (status < 200 || status >= 300) {
+      stop(
+        sprintf("Error: Task submission failed (status code %d).", status),
+        call. = FALSE
+      )
+    }
   }
 
   res
@@ -494,14 +524,16 @@ tasks_run_get <- function(task_id, wait = 0) {
   endpoint <- paste0("/tasks/run/", task_id)
   res <- da_request(endpoint, wait = wait)
 
-  status <- httr2::resp_status(res)
-  if (status < 200 || status >= 300) {
-    stop(
-      sprintf("Error: Fetching task result failed (status code %d).", status),
-      call. = FALSE
-    )
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+  if (!silent) {
+    status <- httr2::resp_status(res)
+    if (status < 200 || status >= 300) {
+      stop(
+        sprintf("Error: Fetching task result failed (status code %d).", status),
+        call. = FALSE
+      )
+    }
   }
 
   res
 }
-
