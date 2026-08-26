@@ -1,0 +1,215 @@
+# Use custom prompts and additional parameters
+
+## Prepare data and login
+
+To prepare the following examples, load the package and example data.
+Then log into the service (see the introduction vignette for further
+information).
+
+``` r
+
+# Load package
+library(databoard)
+
+# Load example data
+df <- databoard::movies
+rules <- databoard::genres
+
+# Login
+da_login()
+```
+
+## Custom prompts
+
+The datavana service is based on [precomposed
+prompts](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts)
+for the different workflows. You can override the default prompt
+templates and by-pass all post-processing to get direct LLM answers
+using the `llm_prompt()` function. Provide your prompts in the
+`prompt.user`- and `prompt.system`-parameters.
+
+In the prompts, for each case in the input data frame `df`, the
+placeholder `{{text}}` will be replaced by the content of the selected
+`abstract` column.
+
+``` r
+
+# Submit tasks
+results <- llm_prompt(
+  df, abstract,
+  
+  prompt.system = paste0(
+    "Output a comma separated list of categories. ",
+    "Just the list, nothing else. ",
+    "The possible categories are: scifi, historical, drama, comedy, fantasy, romance"
+  ),
+  
+  prompt.user = "{{text}}"
+  
+)
+
+
+# Fetch results
+results <- llm_prompt(custom)
+```
+
+*Note:* In the previous example, we used
+[`paste0()`](https://rdrr.io/r/base/paste.html) to concatenate the
+sentences. This serves readability, alternatively, you can provide the
+prompt as one single character string.
+
+## Adapt prompts for the existing workflow methods
+
+Instead of using the `llm_prompt()`-function, you can also adapt the
+prompts used by the workflow-specific functions `llm_summarize()`,
+`llm_code()` or `llm_annotate()`. Using this technique, you can leverage
+the pre- and post-processing steps of the Databoard service. For
+example, when providing rules, the result is automatically split it into
+one field for each category. By the way: under the hood, the
+`llm_prompt()` function uses the summary workflow with settings that
+simply disable result processing.
+
+In your prompt templates, use the `{{text}}` placeholder to define the
+slot where the content of your data frame will be inserted.
+
+The `{{rules}}` placeholder will be replaced by a markdown formatted
+list of all the rules provided in the rules book. When using rules, make
+sure your prompt is compatible with the expected pattern. The
+post-processing procedure expects one line for each output column.
+whatever follows the category name will be inserted into the column.
+
+To enter line breaks into a prompt, use the escape sequence `\n`.
+
+``` r
+
+results <- llm_summarize(
+  movies, abstract, rules, 
+  
+  options = list(
+      prompts = list(
+        system = paste0(
+          "You are an expert in content analysis. Be precise and concise.",
+          "Use the codebook provided to decide for each category, ",
+          "whether the given text falls into the category. ",
+          
+          "Return one line for each category. ",
+          "Each returned line must start with the category name ", 
+          "followed by a colon ':' and then followed by one of the codes ",
+          
+          "'5' if the category applies fully, ",
+          "'4' if the category mostly applies, ",
+          "'3' if the category partially applies, ", 
+          "'2' if the category mostly does not apply, ",
+          "'1' if the category does not apply at all. ", 
+          
+          "Return only the lines for each category - ",
+          "nothing else, no introduction, no explanation, no disclaimer!\n",
+          
+          "# Rules:\n {{rules}}\n"
+        ),
+        user = "{{text}}"
+     )
+   )
+)
+
+results <- llm_summarize(results)
+```
+
+## Additional parameters
+
+We have implemented additional parameters to control the model choice
+(model, temperature), the job queue (wait-parameter) and the processing
+steps (mode-parameter).
+
+### Wait parameter
+
+The service is designed to be called multiple times to gather all
+results irrespective of wait time. You first submit the jobs and than
+poll until all results are finished.
+
+The wait parameter describes the time in seconds the service waits for
+result from the LLM for each request (default = 0, values range from 0
+to 10). For typical use cases, the default of zero is the most sensible
+choice. But if your data set is small and you know that answers will be
+available fast, you can increase the wait time and if you are lucky,
+results will be available directly after submitting the tasks:
+
+``` r
+
+results <- llm_summarize(df, review, wait = 10)
+```
+
+### Mode parameter
+
+Some workflows can return multiple values per case, for example when
+coding text with multiple categories or when summarizing text with
+multiple rules.
+
+Only `llm_code()` exposes an explicit `mode` argument. It controls how
+the coding result is structured:
+
+- `single` (default): return the single best-matching category per case.
+- `multi`: return one value per category, where `2` means the category
+  strongly applies, `1` means it applies, and `0` means it does not
+  apply.
+
+``` r
+
+# Single mode (default)
+
+results <- llm_code(df, abstract, rules, mode = "single")
+results <- llm_code(results)
+
+# Multi mode
+
+results <- llm_code(df, abstract, rules, mode = "multi")
+results <- llm_code(results)
+```
+
+The `llm_summarize()` method uses the same idea internally, but switches
+automatically: with `rules` it returns one result per rule, otherwise it
+returns a single summary per case. A typical use case for multi-mode is
+extracting information such as a movie’s year, the topic or the main
+character’s name. Example:
+
+``` r
+
+rules <- tibble::tribble(
+  ~category,  ~description,                                  ~example,
+  "figure",   "The names of the main characters in the movie", "John Doe",
+  "gender",   "The gender of the main characters",             "male"
+)
+
+results <- llm_summarize(df, abstract, rules)
+results <- llm_summarize(results)
+```
+
+### Model parameters
+
+The workflow wrappers forward model-related settings via the `options`
+list. The most common ones are:
+
+- **model**: choose the LLM model to use.
+- **temperature**: control how deterministic or varied the answer should
+  be.
+
+See the databoard [API
+documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post)
+for a complete list of available options and their values. If you do not
+set these options, the server defaults are used.
+
+For example:
+
+``` r
+
+results <- llm_code(
+  df, abstract, rules, 
+  
+  options = list(
+    model = 'mistral-small',
+    temperature = "0.2"
+  )
+)
+
+results <- llm_code(results)
+```

@@ -1,0 +1,10 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  customprompts: customprompts.html
+  gettingstarted: gettingstarted.html
+last_built: 2026-08-26T14:51Z
+urls:
+  reference: https://datavana.github.io/databoard_r/reference
+  article: https://datavana.github.io/databoard_r/articles
