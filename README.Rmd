@@ -107,7 +107,7 @@ results |>
 
 ```
 
-See the introduction vignette for further examples.
+See the [introduction vignette](https://datavana.github.io/databoard_r/articles/gettingstarted.html) for further examples.
 
 ## Authors and citation
 
