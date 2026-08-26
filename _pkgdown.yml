@@ -1,0 +1,22 @@
+url: https://datavana.github.io/databoard_r/
+template:
+  bootstrap: 5
+  light-switch: true
+navbar:
+  structure:
+    left:
+    - intro
+    - gettingstarted
+    - customprompts
+    - reference
+    right:
+    - search
+    - github
+  components:
+    gettingstarted:
+      text: Getting Started
+      href: articles/gettingstarted.html
+    customprompts:
+      text: Customize your prompts
+      href: articles/customprompts.html
+
