@@ -71,16 +71,16 @@ do its work. Secondly, retrieve results.</p>
 <p>The R package wraps the main functions of the service:</p>
 <ul>
 <li>
-<code>llm_summarize()</code> is used to condense text into shorter
+<code><a href="../reference/llm_summarize.html">llm_summarize()</a></code> is used to condense text into shorter
 paragraphs or even single words. If you provide categories, one summary
 or keyword is returned for each category.</li>
 <li>
-<code>llm_code()</code> assigns predefined categories to a text.
+<code><a href="../reference/llm_code.html">llm_code()</a></code> assigns predefined categories to a text.
 Provide a codebook with category names, descriptions, and optionally
 examples. Depending on your settings, the workflow will return one or
 multiple matching categories.</li>
 <li>
-<code>llm_annotate()</code> adds in-text annotations, for example,
+<code><a href="../reference/llm_annotate.html">llm_annotate()</a></code> adds in-text annotations, for example,
 to extract person or place names. According to your rule set, the
 matching text segments are enclosed in XML tags.</li>
 </ul>
@@ -92,7 +92,7 @@ service.</p>
 processing steps:</p>
 <ul>
 <li>
-<code>llm_prompt()</code> fetches LLM answers using your own prompt
+<code><a href="../reference/llm_prompt.html">llm_prompt()</a></code> fetches LLM answers using your own prompt
 templates.</li>
 </ul>
 <div class="section level3">
@@ -116,7 +116,7 @@ workflow</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load example data from the package</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va">movies</span></span></code></pre></div>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va"><a href="../reference/movies.html">movies</a></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="login-into-the-service">Login into the service<a class="anchor" aria-label="anchor" href="#login-into-the-service"></a>
@@ -124,18 +124,18 @@ workflow</li>
 <p>To obtain credentials for using the Databoard service, contact the <a href="https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml" class="external-link">Digital
 Media and Computational Methods</a> research group.</p>
 <p>Once you have a username and a password you can log into the service
-to get an access token. The <code>da_login()</code> method stores your
+to get an access token. The <code><a href="../reference/da_login.html">da_login()</a></code> method stores your
 access token invisibly in the system environment.</p>
 <p>The login lasts until you close R or log out of the service. Please,
 when working on a shared computer, always remember to close the
 application or log out.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Log into the Databoard service.</span></span>
-<span><span class="fu">da_login</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/da_login.html">da_login</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Log out of the Databoard service</span></span>
-<span><span class="fu">da_logout</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>da_login()</code> method prompts you to provide username
+<span><span class="fu"><a href="../reference/da_logout.html">da_logout</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/da_login.html">da_login()</a></code> method prompts you to provide username
 and password. See the function help for alternative ways to provide your
 credentials.</p>
 </div>
@@ -145,24 +145,24 @@ credentials.</p>
 <p>In our example dataframe <code>movies</code> we have a column
 <code>review</code> which features lengthy reviews of the movies’ plots.
 To summarize them into shorter paragraphs, use
-<code>llm_summarize()</code> and pass the data frame and the name of the
+<code><a href="../reference/llm_summarize.html">llm_summarize()</a></code> and pass the data frame and the name of the
 column containing the review text.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Submit the tasks to the Databoard queue</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">df</span>, <span class="va">review</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">review</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Once you submitted the tasks, call the same method with</span></span>
 <span><span class="co"># the resulting data frame as the first parameter.</span></span>
 <span><span class="co"># Task results that are ready will be added by each call.</span></span>
 <span><span class="co"># The  wait-parameter defines how many seconds to wait at maximum for each case to finish.</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">results</span>, wait <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">results</span>, wait <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>Within RStudio, inspect the <code>results</code> object to see the
 answers.</p>
 </div>
 <div class="section level3">
 <h3 id="using-the-service-to-categorize-text">Using the service to categorize text<a class="anchor" aria-label="anchor" href="#using-the-service-to-categorize-text"></a>
 </h3>
-<p>Use the <code>llm_code()</code> function to categorize text. The
+<p>Use the <code><a href="../reference/llm_code.html">llm_code()</a></code> function to categorize text. The
 function expects three parameters:</p>
 <ul>
 <li>the data frame with the content you want to analyze</li>
@@ -195,10 +195,10 @@ with the example movies dataset:</p>
 <p>Once you have data and rules, let the LLM categorize your text:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Submit</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Keep calling until all tasks are finished.</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect result</span></span>
 <span><span class="fu">count</span><span class="op">(</span><span class="va">results</span>, <span class="va">llm_result</span><span class="op">)</span></span></code></pre></div>
@@ -207,15 +207,15 @@ the mode-parameter to “multi” and obtain a value between 0 to 2 for each
 category:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Submit</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode<span class="op">=</span><span class="st">"multi"</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode<span class="op">=</span><span class="st">"multi"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Keep calling until all tasks are finished.</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="using-the-service-to-annotate-text">Using the service to annotate text<a class="anchor" aria-label="anchor" href="#using-the-service-to-annotate-text"></a>
 </h3>
-<p>Use <code>llm_annotate()</code> to extract and annotate text spans
+<p>Use <code><a href="../reference/llm_annotate.html">llm_annotate()</a></code> to extract and annotate text spans
 according to rules. The rules object is mandatory in submit mode and
 must provide three columns:</p>
 <ul>
@@ -238,10 +238,10 @@ XML-tags.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Submit</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_annotate</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">anno_rules</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_annotate.html">llm_annotate</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">anno_rules</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Fetch pending tasks</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_annotate</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_annotate.html">llm_annotate</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 <p>In addition, you will find a <code>llm_annos</code> column containing
 a data frame with the extracted segments for each case. Unnest them to
 get a simple data frame:</p>

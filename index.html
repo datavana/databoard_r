@@ -63,11 +63,11 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"datavana/databoard_r"</span>, build_manual <span class="op">=</span> <span class="cn">TRUE</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>To use the databoard service you need credentials. Please contact the <a href="https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml" class="external-link">Digital Media and Computational Methods</a> research unit to obtain a username and password.</p>
-<p>Once you have credentials, you can log into the service. The <code>da_login()</code>method prompts for the username and the password (alternatively, provide them in the parameters).</p>
+<p>Once you have credentials, you can log into the service. The <code><a href="reference/da_login.html">da_login()</a></code>method prompts for the username and the password (alternatively, provide them in the parameters).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://databoard.uni-muenster.de/" class="external-link">databoard</a></span><span class="op">)</span></span>
-<span><span class="fu">da_login</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/da_login.html">da_login</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This login process stores your access token for the databoard API service invisibly in the system environment. The login lasts for one session, after closing RStudio you have to renew the login process.</p>
 </div>
 <div class="section level2">
@@ -84,7 +84,7 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get example data</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va">movies</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va"><a href="reference/movies.html">movies</a></span></span>
 <span></span>
 <span><span class="co"># Define coding rules</span></span>
 <span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
@@ -100,13 +100,13 @@
 <span><span class="fu">write_rds</span><span class="op">(</span><span class="va">rules</span>,<span class="st">"data/genres.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Submit to the databoard service</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">movies</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">movies</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Once you submitted your tasks, </span></span>
 <span><span class="co"># call the same method with  your data frame as the first parameter.</span></span>
 <span><span class="co"># Task results that are ready will be added.</span></span>
 <span><span class="co"># Keep calling until all tasks are finished.</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect result</span></span>
 <span><span class="va">results</span> <span class="op">|&gt;</span> </span>

@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   customprompts: customprompts.html
   gettingstarted: gettingstarted.html
-last_built: 2026-08-26T14:51Z
+last_built: 2026-08-27T13:13Z
 urls:
   reference: https://datavana.github.io/databoard_r/reference
   article: https://datavana.github.io/databoard_r/articles

@@ -71,11 +71,11 @@ information).</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://databoard.uni-muenster.de/" class="external-link">databoard</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load example data</span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va">movies</span></span>
-<span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va">genres</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va"><a href="../reference/movies.html">movies</a></span></span>
+<span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va"><a href="../reference/genres.html">genres</a></span></span>
 <span></span>
 <span><span class="co"># Login</span></span>
-<span><span class="fu">da_login</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/da_login.html">da_login</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="custom-prompts">Custom prompts<a class="anchor" aria-label="anchor" href="#custom-prompts"></a>
@@ -83,7 +83,7 @@ information).</p>
 <p>The datavana service is based on <a href="https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts" class="external-link">precomposed
 prompts</a> for the different workflows. You can override the default
 prompt templates and by-pass all post-processing to get direct LLM
-answers using the <code>llm_prompt()</code> function. Provide your
+answers using the <code><a href="../reference/llm_prompt.html">llm_prompt()</a></code> function. Provide your
 prompts in the <code>prompt.user</code>- and
 <code>prompt.system</code>-parameters.</p>
 <p>In the prompts, for each case in the input data frame
@@ -91,7 +91,7 @@ prompts in the <code>prompt.user</code>- and
 by the content of the selected <code>abstract</code> column.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Submit tasks</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_prompt</span><span class="op">(</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_prompt.html">llm_prompt</a></span><span class="op">(</span></span>
 <span>  <span class="va">df</span>, <span class="va">abstract</span>,</span>
 <span>  </span>
 <span>  prompt.system <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
@@ -106,7 +106,7 @@ by the content of the selected <code>abstract</code> column.</p>
 <span></span>
 <span></span>
 <span><span class="co"># Fetch results</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_prompt</span><span class="op">(</span><span class="va">custom</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_prompt.html">llm_prompt</a></span><span class="op">(</span><span class="va">custom</span><span class="op">)</span></span></code></pre></div>
 <p><em>Note:</em> In the previous example, we used <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0()</a></code>
 to concatenate the sentences. This serves readability, alternatively,
 you can provide the prompt as one single character string.</p>
@@ -114,14 +114,14 @@ you can provide the prompt as one single character string.</p>
 <div class="section level2">
 <h2 id="adapt-prompts-for-the-existing-workflow-methods">Adapt prompts for the existing workflow methods<a class="anchor" aria-label="anchor" href="#adapt-prompts-for-the-existing-workflow-methods"></a>
 </h2>
-<p>Instead of using the <code>llm_prompt()</code>-function, you can also
+<p>Instead of using the <code><a href="../reference/llm_prompt.html">llm_prompt()</a></code>-function, you can also
 adapt the prompts used by the workflow-specific functions
-<code>llm_summarize()</code>, <code>llm_code()</code> or
-<code>llm_annotate()</code>. Using this technique, you can leverage the
+<code><a href="../reference/llm_summarize.html">llm_summarize()</a></code>, <code><a href="../reference/llm_code.html">llm_code()</a></code> or
+<code><a href="../reference/llm_annotate.html">llm_annotate()</a></code>. Using this technique, you can leverage the
 pre- and post-processing steps of the Databoard service. For example,
 when providing rules, the result is automatically split it into one
 field for each category. By the way: under the hood, the
-<code>llm_prompt()</code> function uses the summary workflow with
+<code><a href="../reference/llm_prompt.html">llm_prompt()</a></code> function uses the summary workflow with
 settings that simply disable result processing.</p>
 <p>In your prompt templates, use the <code>{{text}}</code> placeholder
 to define the slot where the content of your data frame will be
@@ -134,7 +134,7 @@ whatever follows the category name will be inserted into the column.</p>
 <p>To enter line breaks into a prompt, use the escape sequence
 <code>\n</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span></span>
 <span>  <span class="va">movies</span>, <span class="va">abstract</span>, <span class="va">rules</span>, </span>
 <span>  </span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -164,7 +164,7 @@ whatever follows the category name will be inserted into the column.</p>
 <span>   <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-parameters">Additional parameters<a class="anchor" aria-label="anchor" href="#additional-parameters"></a>
@@ -186,7 +186,7 @@ will be available fast, you can increase the wait time and if you are
 lucky, results will be available directly after submitting the
 tasks:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">df</span>, <span class="va">review</span>, wait <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">review</span>, wait <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mode-parameter">Mode parameter<a class="anchor" aria-label="anchor" href="#mode-parameter"></a>
@@ -194,7 +194,7 @@ tasks:</p>
 <p>Some workflows can return multiple values per case, for example when
 coding text with multiple categories or when summarizing text with
 multiple rules.</p>
-<p>Only <code>llm_code()</code> exposes an explicit <code>mode</code>
+<p>Only <code><a href="../reference/llm_code.html">llm_code()</a></code> exposes an explicit <code>mode</code>
 argument. It controls how the coding result is structured:</p>
 <ul>
 <li>
@@ -208,14 +208,14 @@ it applies, and <code>0</code> means it does not apply.</li>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Single mode (default)</span></span>
 <span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode <span class="op">=</span> <span class="st">"single"</span><span class="op">)</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode <span class="op">=</span> <span class="st">"single"</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Multi mode</span></span>
 <span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode <span class="op">=</span> <span class="st">"multi"</span><span class="op">)</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>llm_summarize()</code> method uses the same idea
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, mode <span class="op">=</span> <span class="st">"multi"</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="../reference/llm_summarize.html">llm_summarize()</a></code> method uses the same idea
 internally, but switches automatically: with <code>rules</code> it
 returns one result per rule, otherwise it returns a single summary per
 case. A typical use case for multi-mode is extracting information such
@@ -227,8 +227,8 @@ as a movie’s year, the topic or the main character’s name. Example:</p>
 <span>  <span class="st">"gender"</span>,   <span class="st">"The gender of the main characters"</span>,             <span class="st">"male"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_summarize</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_summarize.html">llm_summarize</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="model-parameters">Model parameters<a class="anchor" aria-label="anchor" href="#model-parameters"></a>
@@ -248,7 +248,7 @@ values. If you do not set these options, the server defaults are
 used.</p>
 <p>For example:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span></span>
 <span>  <span class="va">df</span>, <span class="va">abstract</span>, <span class="va">rules</span>, </span>
 <span>  </span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -257,7 +257,7 @@ used.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">llm_code</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

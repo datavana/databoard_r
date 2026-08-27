@@ -26,8 +26,9 @@ Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-me
 research unit to obtain a username and password.
 
 Once you have credentials, you can log into the service. The
-`da_login()`method prompts for the username and the password
-(alternatively, provide them in the parameters).
+[`da_login()`](https://datavana.github.io/databoard_r/reference/da_login.md)method
+prompts for the username and the password (alternatively, provide them
+in the parameters).
 
 ``` r
 

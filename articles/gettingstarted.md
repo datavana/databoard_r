@@ -10,16 +10,19 @@ do its work. Secondly, retrieve results.
 
 The R package wraps the main functions of the service:
 
-- `llm_summarize()` is used to condense text into shorter paragraphs or
-  even single words. If you provide categories, one summary or keyword
-  is returned for each category.
-- `llm_code()` assigns predefined categories to a text. Provide a
-  codebook with category names, descriptions, and optionally examples.
-  Depending on your settings, the workflow will return one or multiple
-  matching categories.
-- `llm_annotate()` adds in-text annotations, for example, to extract
-  person or place names. According to your rule set, the matching text
-  segments are enclosed in XML tags.
+- [`llm_summarize()`](https://datavana.github.io/databoard_r/reference/llm_summarize.md)
+  is used to condense text into shorter paragraphs or even single words.
+  If you provide categories, one summary or keyword is returned for each
+  category.
+- [`llm_code()`](https://datavana.github.io/databoard_r/reference/llm_code.md)
+  assigns predefined categories to a text. Provide a codebook with
+  category names, descriptions, and optionally examples. Depending on
+  your settings, the workflow will return one or multiple matching
+  categories.
+- [`llm_annotate()`](https://datavana.github.io/databoard_r/reference/llm_annotate.md)
+  adds in-text annotations, for example, to extract person or place
+  names. According to your rule set, the matching text segments are
+  enclosed in XML tags.
 
 The predefined methods are based on pre-composed prompt templates and
 include pre- and post-processing steps aligned to the workflow. You can
@@ -28,7 +31,8 @@ customize the prompts and several other options exposed by the service.
 To gain full flexibility, use custom prompts and by-pass the processing
 steps:
 
-- `llm_prompt()` fetches LLM answers using your own prompt templates.
+- [`llm_prompt()`](https://datavana.github.io/databoard_r/reference/llm_prompt.md)
+  fetches LLM answers using your own prompt templates.
 
 ### Install the package and get example data
 
@@ -65,8 +69,9 @@ Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-me
 research group.
 
 Once you have a username and a password you can log into the service to
-get an access token. The `da_login()` method stores your access token
-invisibly in the system environment.
+get an access token. The
+[`da_login()`](https://datavana.github.io/databoard_r/reference/da_login.md)
+method stores your access token invisibly in the system environment.
 
 The login lasts until you close R or log out of the service. Please,
 when working on a shared computer, always remember to close the
@@ -81,15 +86,19 @@ da_login()
 da_logout()
 ```
 
-The `da_login()` method prompts you to provide username and password.
-See the function help for alternative ways to provide your credentials.
+The
+[`da_login()`](https://datavana.github.io/databoard_r/reference/da_login.md)
+method prompts you to provide username and password. See the function
+help for alternative ways to provide your credentials.
 
 ### Using the service to summarize text
 
 In our example dataframe `movies` we have a column `review` which
 features lengthy reviews of the movies’ plots. To summarize them into
-shorter paragraphs, use `llm_summarize()` and pass the data frame and
-the name of the column containing the review text.
+shorter paragraphs, use
+[`llm_summarize()`](https://datavana.github.io/databoard_r/reference/llm_summarize.md)
+and pass the data frame and the name of the column containing the review
+text.
 
 ``` r
 
@@ -107,8 +116,9 @@ Within RStudio, inspect the `results` object to see the answers.
 
 ### Using the service to categorize text
 
-Use the `llm_code()` function to categorize text. The function expects
-three parameters:
+Use the
+[`llm_code()`](https://datavana.github.io/databoard_r/reference/llm_code.md)
+function to categorize text. The function expects three parameters:
 
 - the data frame with the content you want to analyze
 - the name of the column containing the text to be anlyzed
@@ -170,9 +180,10 @@ results <- llm_code(results)
 
 ### Using the service to annotate text
 
-Use `llm_annotate()` to extract and annotate text spans according to
-rules. The rules object is mandatory in submit mode and must provide
-three columns:
+Use
+[`llm_annotate()`](https://datavana.github.io/databoard_r/reference/llm_annotate.md)
+to extract and annotate text spans according to rules. The rules object
+is mandatory in submit mode and must provide three columns:
 
 - `category`: used as `value` attribute in the annotation
 - `description`: used to identify text segments

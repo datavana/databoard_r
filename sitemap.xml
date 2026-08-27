@@ -6,6 +6,24 @@
 <url><loc>https://datavana.github.io/databoard_r/articles/index.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/authors.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/index.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_extract.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_fetch.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_finished.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_login.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_logout.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_progress.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_request.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_submit.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/da_unnest.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/extract_annos.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/genres.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/index.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/llm_annotate.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/llm_code.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/llm_prompt.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/llm_summarize.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/movies.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/tasks_run_get.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/tasks_run_post.html</loc></url>
 </urlset>
 

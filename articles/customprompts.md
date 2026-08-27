@@ -25,8 +25,10 @@ The datavana service is based on [precomposed
 prompts](https://github.com/datavana/databoard_core/tree/main/src/databoard_core/resources/prompts)
 for the different workflows. You can override the default prompt
 templates and by-pass all post-processing to get direct LLM answers
-using the `llm_prompt()` function. Provide your prompts in the
-`prompt.user`- and `prompt.system`-parameters.
+using the
+[`llm_prompt()`](https://datavana.github.io/databoard_r/reference/llm_prompt.md)
+function. Provide your prompts in the `prompt.user`- and
+`prompt.system`-parameters.
 
 In the prompts, for each case in the input data frame `df`, the
 placeholder `{{text}}` will be replaced by the content of the selected
@@ -60,14 +62,20 @@ prompt as one single character string.
 
 ## Adapt prompts for the existing workflow methods
 
-Instead of using the `llm_prompt()`-function, you can also adapt the
-prompts used by the workflow-specific functions `llm_summarize()`,
-`llm_code()` or `llm_annotate()`. Using this technique, you can leverage
-the pre- and post-processing steps of the Databoard service. For
-example, when providing rules, the result is automatically split it into
-one field for each category. By the way: under the hood, the
-`llm_prompt()` function uses the summary workflow with settings that
-simply disable result processing.
+Instead of using the
+[`llm_prompt()`](https://datavana.github.io/databoard_r/reference/llm_prompt.md)-function,
+you can also adapt the prompts used by the workflow-specific functions
+[`llm_summarize()`](https://datavana.github.io/databoard_r/reference/llm_summarize.md),
+[`llm_code()`](https://datavana.github.io/databoard_r/reference/llm_code.md)
+or
+[`llm_annotate()`](https://datavana.github.io/databoard_r/reference/llm_annotate.md).
+Using this technique, you can leverage the pre- and post-processing
+steps of the Databoard service. For example, when providing rules, the
+result is automatically split it into one field for each category. By
+the way: under the hood, the
+[`llm_prompt()`](https://datavana.github.io/databoard_r/reference/llm_prompt.md)
+function uses the summary workflow with settings that simply disable
+result processing.
 
 In your prompt templates, use the `{{text}}` placeholder to define the
 slot where the content of your data frame will be inserted.
@@ -145,8 +153,10 @@ Some workflows can return multiple values per case, for example when
 coding text with multiple categories or when summarizing text with
 multiple rules.
 
-Only `llm_code()` exposes an explicit `mode` argument. It controls how
-the coding result is structured:
+Only
+[`llm_code()`](https://datavana.github.io/databoard_r/reference/llm_code.md)
+exposes an explicit `mode` argument. It controls how the coding result
+is structured:
 
 - `single` (default): return the single best-matching category per case.
 - `multi`: return one value per category, where `2` means the category
@@ -166,11 +176,13 @@ results <- llm_code(df, abstract, rules, mode = "multi")
 results <- llm_code(results)
 ```
 
-The `llm_summarize()` method uses the same idea internally, but switches
-automatically: with `rules` it returns one result per rule, otherwise it
-returns a single summary per case. A typical use case for multi-mode is
-extracting information such as a movie’s year, the topic or the main
-character’s name. Example:
+The
+[`llm_summarize()`](https://datavana.github.io/databoard_r/reference/llm_summarize.md)
+method uses the same idea internally, but switches automatically: with
+`rules` it returns one result per rule, otherwise it returns a single
+summary per case. A typical use case for multi-mode is extracting
+information such as a movie’s year, the topic or the main character’s
+name. Example:
 
 ``` r
 
