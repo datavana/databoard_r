@@ -51,6 +51,7 @@ reference:
   - da_fetch
   - da_finished
   - da_progress
+  - da_request
 
 - title: Example data
 - contents:
