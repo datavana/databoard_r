@@ -178,13 +178,12 @@ da_submit <- function(data, col, task, options, wait = 0) {
   # Main loop
   for (i in seq_len(n)) {
     resp <- tasks_run_post(task, input[i], options, wait)
+    data <- da_extract(data, resp, i)
+    pb$tick()
 
     if (!da_authorized(resp)) {
       break
     }
-
-    data <- da_extract(data, resp, i)
-    pb$tick()
   }
 
   data <- da_unnest(data)
@@ -234,10 +233,10 @@ da_fetch <- function(data, wait = 10) {
 
     if (data$.task_state[i] == "PENDING") {
       resp <- tasks_run_get(data$.task_id[i], wait)
+      data <- da_extract(data, resp, i)
       if (!da_authorized(resp)) {
         break
       }
-      data <- da_extract(data, resp, i)
     }
     pb$tick()
 
