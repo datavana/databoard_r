@@ -110,6 +110,31 @@ da_logout <- function() {
   invisible(TRUE)
 }
 
+#' Check whether a response contains status code 401
+#'
+#' Stops with an error message if DATABOARD_SILENT is not TRUE.
+#'
+#' @param resp The server response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()].
+#' @return A boolean indicating whether the user is authorized.
+#'
+#' @seealso [da_login()]
+#'
+#' @keywords internal
+da_authorized <- function(resp) {
+  authorized <- httr2::resp_status(res) != 401
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+
+  if (!authorized & !silent) {
+    stop(
+      sprintf("Error: Task submission failed (status code %d).", status),
+      call. = FALSE
+    )
+  }
+
+  authorized
+}
+
 #' Submit tasks to the Databoard service
 #'
 #' Submits one Databoard task per row of `data`, using the values of `col` as
@@ -153,6 +178,11 @@ da_submit <- function(data, col, task, options, wait = 0) {
   # Main loop
   for (i in seq_len(n)) {
     resp <- tasks_run_post(task, input[i], options, wait)
+
+    if (!da_authorized(resp)) {
+      break
+    }
+
     data <- da_extract(data, resp, i)
     pb$tick()
   }
@@ -204,6 +234,9 @@ da_fetch <- function(data, wait = 10) {
 
     if (data$.task_state[i] == "PENDING") {
       resp <- tasks_run_get(data$.task_id[i], wait)
+      if (!da_authorized(resp)) {
+        break
+      }
       data <- da_extract(data, resp, i)
     }
     pb$tick()
