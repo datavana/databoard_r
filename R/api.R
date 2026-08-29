@@ -558,7 +558,7 @@ check_authorized <- function(resp) {
 #' @keywords internal
 check_succesful <- function(resp) {
 
-  status <- httr2::resp_status(res)
+  status <- httr2::resp_status(resp)
   successful = ! ((status < 200 || status >= 300))
 
   silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
