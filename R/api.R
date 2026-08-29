@@ -110,31 +110,6 @@ da_logout <- function() {
   invisible(TRUE)
 }
 
-#' Check whether a response contains status code 401
-#'
-#' Stops with an error message if DATABOARD_SILENT is not TRUE.
-#'
-#' @param resp The server response as returned by [tasks_run_post()] or
-#'   [tasks_run_get()].
-#' @return A boolean indicating whether the user is authorized.
-#'
-#' @seealso [da_login()]
-#'
-#' @keywords internal
-da_authorized <- function(resp) {
-  authorized <- httr2::resp_status(resp) != 401
-  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
-
-  if (!authorized & !silent) {
-    stop(
-      sprintf("Error: Task submission failed (status code %d).", status),
-      call. = FALSE
-    )
-  }
-
-  authorized
-}
-
 #' Submit tasks to the Databoard service
 #'
 #' Submits one Databoard task per row of `data`, using the values of `col` as
@@ -180,8 +155,7 @@ da_submit <- function(data, col, task, options, wait = 0) {
     resp <- tasks_run_post(task, input[i], options, wait)
     data <- da_extract(data, resp, i)
     pb$tick()
-
-    if (!da_authorized(resp)) {
+    if (!check_authorized(resp)) {
       break
     }
   }
@@ -234,7 +208,7 @@ da_fetch <- function(data, wait = 10) {
     if (data$.task_state[i] == "PENDING") {
       resp <- tasks_run_get(data$.task_id[i], wait)
       data <- da_extract(data, resp, i)
-      if (!da_authorized(resp)) {
+      if (!check_authorized(resp)) {
         break
       }
     }
@@ -277,34 +251,34 @@ da_extract <- function(data, resp, no) {
   }
 
   statuscode <- httr2::resp_status(resp)
+  body <- parse_json(resp)
 
-  # Only try to parse JSON if the server actually returned JSON.
-  # For example, on HTTP errors the body may be an HTML error page.
-  body <- NULL
-  if (httr2::resp_has_body(resp) &&
-      grepl("json", httr2::resp_content_type(resp), fixed = TRUE)) {
-    body <- tryCatch(
-      httr2::resp_body_json(resp, simplifyVector = TRUE),
-      error = function(e) NULL
-    )
-  }
-
-
+  # Task ID
   if (!is.null(body$task_id)) {
     data$.task_id[no] <- body$task_id
   }
 
+  # Task state
   if (!is.null(body$state)) {
     data$.task_state[no] <- body$state
   } else {
     data$.task_state[no] <- paste0("CODE ", statuscode)
   }
 
+  # Task answers
   answers <- body$result$answers
   if (is.null(answers) || length(answers) == 0L) {
     data$.task_result[no] <- list(tibble::tibble())
   } else {
     data$.task_result[no] <- list(tibble::as_tibble(answers))
+  }
+
+  # Task messages
+  if (!is.null(body$msg)) {
+    if (!(".task_msg" %in% colnames(data))) {
+      data$.task_msg <- NA
+    }
+    data$.task_msg[no] <- body$msg
   }
 
   data
@@ -360,7 +334,7 @@ da_unnest <- function(data) {
 
   dplyr::relocate(
     out,
-    dplyr::any_of(c(".task_id", ".task_state")),
+    dplyr::any_of(c(".task_id", ".task_state", ".task_msg")),
     .after = dplyr::last_col()
   )
 }
@@ -471,7 +445,9 @@ da_request <- function(endpoint, body, wait = 0) {
     httr2::req_retry(max_tries = getOption("databoard.maxretries", DATABOARD_MAXRETRIES)) |>
     httr2::req_error(is_error = function(resp) FALSE)
 
-  httr2::req_perform(req)
+  resp <- httr2::req_perform(req)
+  check_succesful(resp)
+  resp
 
 }
 
@@ -511,20 +487,7 @@ tasks_run_post <- function(task, input, options, wait = 0) {
     options = options
   )
 
-  res <- da_request(endpoint, body, wait = wait)
-
-  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
-  if (!silent) {
-    status <- httr2::resp_status(res)
-    if (status < 200 || status >= 300) {
-      stop(
-        sprintf("Error: Task submission failed (status code %d).", status),
-        call. = FALSE
-      )
-    }
-  }
-
-  res
+  da_request(endpoint, body, wait = wait)
 }
 
 
@@ -554,18 +517,66 @@ tasks_run_get <- function(task_id, wait = 0) {
   }
 
   endpoint <- paste0("/tasks/run/", task_id)
-  res <- da_request(endpoint, wait = wait)
+  da_request(endpoint, wait = wait)
+}
 
+
+#' Check whether a response contains status code 401
+#'
+#' Stops with an error message if DATABOARD_SILENT is not TRUE.
+#'
+#' @param resp The server response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()].
+#' @return A boolean indicating whether the user is authorized.
+#'
+#' @seealso [da_login()]
+#'
+#' @keywords internal
+check_authorized <- function(resp) {
+  authorized <- httr2::resp_status(resp) != 401
   silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
-  if (!silent) {
-    status <- httr2::resp_status(res)
-    if (status < 200 || status >= 300) {
-      stop(
-        sprintf("Error: Fetching task result failed (status code %d).", status),
-        call. = FALSE
-      )
-    }
+
+  if (!authorized & !silent) {
+    stop(
+      sprintf("Error: Task submission failed (status code %d).", status),
+      call. = FALSE
+    )
   }
 
-  res
+  authorized
+}
+
+#' Check whether a response was successful (code 20x)
+#'
+#' Stops with an error message if DATABOARD_SILENT is not TRUE.
+#'
+#'
+#' @param resp The server response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()].
+#' @return A boolean indicating whether the response was succesful
+#'
+#' @keywords internal
+check_succesful <- function(resp) {
+
+  status <- httr2::resp_status(res)
+  successful = ! ((status < 200 || status >= 300))
+
+  silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
+  if (!silent & !successful) {
+
+    msg <- "Error: Processing request failed (status code %d)."
+
+    # Get message if available
+    body <- parse_json(resp)
+    if (!is.null(body$msg)) {
+      msg <- paste0(msg, " ", body$msg)
+    }
+
+    stop(
+      sprintf(msg, status),
+      call. = FALSE
+    )
+  }
+
+  successful
 }
