@@ -50,7 +50,7 @@ The Databoard package can be installed from source using the remotes package.
 
 library(remotes)
 remotes::install_github("datavana/databoard_r")
-
+library(databoard)
 ```
 
 
@@ -175,7 +175,6 @@ results <- llm_code(df, abstract, rules, mode="multi")
 
 # Keep calling until all tasks are finished.
 results <- llm_code(results)
-
 
 ```
 

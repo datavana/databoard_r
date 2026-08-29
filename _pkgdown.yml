@@ -1,0 +1,64 @@
+url: https://datavana.github.io/databoard_r/
+template:
+  bootstrap: 5
+  light-switch: true
+navbar:
+  structure:
+    left:
+    - intro
+    - gettingstarted
+    - customprompts
+    - reference
+    right:
+    - search
+    - github
+  components:
+    gettingstarted:
+      text: Getting Started
+      href: articles/gettingstarted.html
+    customprompts:
+      text: Customize your prompts
+      href: articles/customprompts.html
+
+reference:
+- title: Login
+  desc: >
+    Functions to login and logout to the databoard.
+- contents:
+  - da_login
+  - da_logout
+
+- title: Main functionalities
+  desc: >
+    Main functionalities to code, summarize and annotate text.
+- contents:
+  - llm_annotate
+  - llm_code
+  - llm_summarize
+
+- title: Customizable Functions
+  desc: >
+      Functions with full customazibility.
+- contents:
+  - llm_prompt
+
+- title: Helper Functions
+  desc:  >
+      Individual functions tp submit data to the databoard,
+      fetch results and show the progress.
+- contents:
+  - da_submit
+  - da_fetch
+  - da_finished
+  - da_progress
+  - da_request
+
+- title: Example data
+- contents:
+  - movies
+  - genres
+
+
+
+
+
