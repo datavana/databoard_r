@@ -533,12 +533,13 @@ tasks_run_get <- function(task_id, wait = 0) {
 #'
 #' @keywords internal
 check_authorized <- function(resp) {
-  authorized <- httr2::resp_status(resp) != 401
+  status <- httr2::resp_status(resp)
+  authorized <- status != 401
   silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
 
   if (!authorized & !silent) {
     stop(
-      sprintf("Error: Task submission failed (status code %d).", status),
+      sprintf("Error: You are not authorized, please log in (status code %d).", status),
       call. = FALSE
     )
   }
