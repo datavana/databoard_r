@@ -6,7 +6,8 @@
 <url><loc>https://datavana.github.io/databoard_r/articles/index.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/authors.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/index.html</loc></url>
-<url><loc>https://datavana.github.io/databoard_r/reference/da_authorized.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/check_authorized.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/check_succesful.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/da_extract.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/da_fetch.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/da_finished.html</loc></url>
@@ -24,6 +25,7 @@
 <url><loc>https://datavana.github.io/databoard_r/reference/llm_prompt.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/llm_summarize.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/movies.html</loc></url>
+<url><loc>https://datavana.github.io/databoard_r/reference/parse_json.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/tasks_run_get.html</loc></url>
 <url><loc>https://datavana.github.io/databoard_r/reference/tasks_run_post.html</loc></url>
 </urlset>
