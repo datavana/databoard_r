@@ -122,7 +122,7 @@ da_logout <- function() {
 #'
 #' @keywords internal
 da_authorized <- function(resp) {
-  authorized <- httr2::resp_status(res) != 401
+  authorized <- httr2::resp_status(resp) != 401
   silent <- Sys.getenv("DATABOARD_SILENT") == "TRUE"
 
   if (!authorized & !silent) {
