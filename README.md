@@ -88,7 +88,9 @@ results |>
   
 ```
 
-See the introduction vignette for further examples.
+See the [introduction
+vignette](https://datavana.github.io/databoard_r/articles/gettingstarted.html)
+for further examples.
 
 ## Authors and citation
 
@@ -98,3 +100,6 @@ Katharina Maubach (University of Münster)
 Jakob Jünger (University of Münster)
 
 **Citation**  
+
+Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding
+with Large Language Models. R package version 0.0.0.9000.

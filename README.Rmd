@@ -118,5 +118,6 @@ Jakob Jünger (University of Münster)
 
 **Citation**\
 
+Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding with Large Language Models. R package version 0.0.0.9000.
 
 
