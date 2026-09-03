@@ -35,3 +35,27 @@ extract_annos <- function(text) {
     segment = xml2::xml_text(nodes, trim = TRUE)
   )
 }
+
+
+#' Parse JSON from a response
+#'
+#' Only try to parse JSON if the server actually returned JSON.
+#' For example, on HTTP errors the body may be an HTML error page.
+#'
+#' @param resp The server response as returned by [tasks_run_post()] or
+#'   [tasks_run_get()].
+#' @return The parsed JSON object or NULL
+#'
+#' @keywords internal
+parse_json <- function(resp) {
+    body <- NULL
+  if (httr2::resp_has_body(resp) &&
+      grepl("json", httr2::resp_content_type(resp), fixed = TRUE)) {
+    body <- tryCatch(
+      httr2::resp_body_json(resp, simplifyVector = TRUE),
+      error = function(e) NULL
+    )
+  }
+
+  body
+}
