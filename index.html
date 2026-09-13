@@ -86,7 +86,7 @@
 <span><span class="co"># Get example data</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">databoard</span><span class="fu">::</span><span class="va"><a href="reference/movies.html">movies</a></span></span>
 <span></span>
-<span><span class="co"># Define coding rules</span></span>
+<span><span class="co"># Define coding rules (same as in databoard::genres)</span></span>
 <span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">category</span>,  <span class="op">~</span><span class="va">description</span>,                                                               <span class="op">~</span><span class="va">example</span>,</span>
 <span>  <span class="st">"History"</span>,  <span class="st">"Movies based on real events or people from the past."</span>,                     <span class="st">"Schindler’s List, Braveheart"</span>,</span>
@@ -96,8 +96,6 @@
 <span>  <span class="st">"Comedy"</span>,   <span class="st">"Films made to entertain and make the audience laugh."</span>,                     <span class="st">"Mean Girls, The Hangover"</span>,</span>
 <span>  <span class="st">"Drama"</span>,    <span class="st">"Serious stories focused on relationships, and character development."</span>,     <span class="st">"Forrest Gump, A Beautiful Mind"</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">write_rds</span><span class="op">(</span><span class="va">rules</span>,<span class="st">"data/genres.rda"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Submit to the databoard service</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/llm_code.html">llm_code</a></span><span class="op">(</span><span class="va">movies</span>, <span class="va">abstract</span>, <span class="va">rules</span><span class="op">)</span></span>
