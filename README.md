@@ -60,7 +60,7 @@ library(tidyverse)
 # Get example data
 df <- databoard::movies
 
-# Define coding rules
+# Define coding rules (same as in databoard::genres)
 rules <- tibble::tribble(
   ~category,  ~description,                                                               ~example,
   "History",  "Movies based on real events or people from the past.",                     "Schindler’s List, Braveheart",
@@ -70,8 +70,6 @@ rules <- tibble::tribble(
   "Comedy",   "Films made to entertain and make the audience laugh.",                     "Mean Girls, The Hangover",
   "Drama",    "Serious stories focused on relationships, and character development.",     "Forrest Gump, A Beautiful Mind"
 )
-
-write_rds(rules,"data/genres.rda")
 
 # Submit to the databoard service
 results <- llm_code(movies, abstract, rules)
