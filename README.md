@@ -7,6 +7,8 @@
 
 <!-- badges: end -->
 
+<a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
+
 The databoard package is designed to interface with the databoard
 service, enabling automated content coding via large language models.
 
