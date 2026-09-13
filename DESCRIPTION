@@ -1,6 +1,6 @@
 Package: databoard
 Title: Automated Content Coding with Large Language Models
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Katharina", "Maubach", email = "k.maubach@uni-muenster.de", role = c("cre", "aut")),
     person("Jakob", "Juenger", email = "jakob.juenger@uni-muenster.de", role = c("aut"))
