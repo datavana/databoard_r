@@ -115,7 +115,7 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
 #'
 #' Submits each row of `data` to the Databoard `coding` task, which asks an
 #' LLM to assign category codes to the text in `col` based on a set of coding
-#' `rules`. The databoard server pre-processes the rules to embed them in the prompt,
+#' `rules`. The Databoard server pre-processes the rules to embed them in the prompt,
 #' and post-processes the LLM answer to split it into columns for a data frame.
 #'
 #' The function has two modes of operation, dispatched automatically:
@@ -148,7 +148,7 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
 #' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
 #' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
 #'
-#' See the databoard documentation for further options.
+#' See the Databoard documentation for further options.
 #'
 #' @param data A data frame containing the texts to be coded, or a data frame
 #'   previously returned by `llm_code()` whose pending results should be
@@ -217,7 +217,7 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' Submits each row of `data` to the Databoard `summarize` task, which asks
 #' an LLM to summarise the text in `col`. Optionally, a `rules` data frame
 #' can be provided to produce structured, per-category summaries.
-#' The databoard server pre-processes the rules to embed them in the prompt,
+#' The Databoard server pre-processes the rules to embed them in the prompt,
 #' and post-processes the LLM answer to split it into columns for a data frame.
 #'
 #' The function has two modes of operation, dispatched automatically:
@@ -251,7 +251,7 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' If present in the prompts, the placeholder `{{text}}` is replaced by the value of the current case.
 #' The placeholder `{{rules}}` is replaced by a rule book generated from the rules data frame.
 #'
-#' See the databoard documentation for further options.
+#' See the Databoard documentation for further options.
 #'
 #' @param data A data frame containing the texts to be summarised, or a data
 #'   frame previously returned by `llm_summarize()` whose pending results

@@ -409,7 +409,7 @@ da_finished <- function(data) {
   all(data$.task_state != "PENDING")
 }
 
-#' Send a request to the databoard server
+#' Send a request to the Databoard server
 #'
 #' @param endpoint The path including a leading slash
 #' @param body If provided, the body is send via a POST request.

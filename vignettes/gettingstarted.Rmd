@@ -18,7 +18,7 @@ library(tidyr)
 knitr::opts_chunk$set(eval=FALSE, include=TRUE)
 ```
 
-# Introduction to the databoard package
+# Introduction to the Databoard package
 
 With the Datavana Databoard service you can easily feed content into an LLM for automated analyses.´
 After you submitted tasks, the data is processed in the background. 
@@ -221,5 +221,4 @@ segments <- results |>
 
 ## What's next?
 
-Customize your prompts and learn about additional model parameters in the 
-customprompts vignette.
+Customize your prompts and learn about additional model parameters in the `vignette("customprompts")`vignette.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/api.R
 \name{da_request}
 \alias{da_request}
-\title{Send a request to the databoard server}
+\title{Send a request to the Databoard server}
 \usage{
 da_request(endpoint, body, wait = 0)
 }
@@ -18,5 +18,5 @@ Otherwise, a GET request is issued.}
 The response object.
 }
 \description{
-Send a request to the databoard server
+Send a request to the Databoard server
 }

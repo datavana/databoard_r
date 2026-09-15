@@ -39,7 +39,7 @@ result columns (e.g. \code{llm_result}).
 Submits each row of \code{data} to the Databoard \code{summarize} task, which asks
 an LLM to summarise the text in \code{col}. Optionally, a \code{rules} data frame
 can be provided to produce structured, per-category summaries.
-The databoard server pre-processes the rules to embed them in the prompt,
+The Databoard server pre-processes the rules to embed them in the prompt,
 and post-processes the LLM answer to split it into columns for a data frame.
 }
 \details{
@@ -74,7 +74,7 @@ using a line break (as in \code{\link[=llm_prompt]{llm_prompt()}}).
 If present in the prompts, the placeholder \code{{{text}}} is replaced by the value of the current case.
 The placeholder \code{{{rules}}} is replaced by a rule book generated from the rules data frame.
 
-See the databoard documentation for further options.
+See the Databoard documentation for further options.
 }
 \examples{
 \dontrun{

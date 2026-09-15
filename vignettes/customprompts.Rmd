@@ -64,7 +64,7 @@ results <- llm_prompt(
 
 
 # Fetch results
-results <- llm_prompt(custom)
+results <- llm_prompt(results)
 
 ```
 
@@ -193,7 +193,7 @@ The most common ones are:
 - **model**: choose the LLM model to use.
 - **temperature**: control how deterministic or varied the answer should be.
 
-See the databoard [API documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post) for a complete list of available options and their values.
+See the Databoard [API documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post) for a complete list of available options and their values.
 If you do not set these options, the server defaults are used.
 
 For example:
