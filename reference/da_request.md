@@ -1,6 +1,6 @@
-# Send a request to the databoard server
+# Send a request to the Databoard server
 
-Send a request to the databoard server
+Send a request to the Databoard server
 
 ## Usage
 

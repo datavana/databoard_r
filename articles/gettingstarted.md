@@ -1,6 +1,6 @@
 # Getting started with the databoard
 
-## Introduction to the databoard package
+## Introduction to the Databoard package
 
 With the Datavana Databoard service you can easily feed content into an
 LLM for automated analyses.´ After you submitted tasks, the data is
@@ -220,4 +220,5 @@ segments <- results |>
 ### What’s next?
 
 Customize your prompts and learn about additional model parameters in
-the customprompts vignette.
+the
+[`vignette("customprompts")`](https://datavana.github.io/databoard_r/articles/customprompts.md)vignette.

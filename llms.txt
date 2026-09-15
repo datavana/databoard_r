@@ -142,7 +142,7 @@ show the progress.
 - [`da_progress()`](https://datavana.github.io/databoard_r/reference/da_progress.md)
   : Summarise task states of a Databoard data frame
 - [`da_request()`](https://datavana.github.io/databoard_r/reference/da_request.md)
-  : Send a request to the databoard server
+  : Send a request to the Databoard server
 
 ## Example data
 

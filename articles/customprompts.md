@@ -52,7 +52,7 @@ results <- llm_prompt(
 
 
 # Fetch results
-results <- llm_prompt(custom)
+results <- llm_prompt(results)
 ```
 
 *Note:* In the previous example, we used
@@ -205,7 +205,7 @@ list. The most common ones are:
 - **temperature**: control how deterministic or varied the answer should
   be.
 
-See the databoard [API
+See the Databoard [API
 documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post)
 for a complete list of available options and their values. If you do not
 set these options, the server defaults are used.

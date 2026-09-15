@@ -2,7 +2,7 @@
 
 Submits each row of `data` to the Databoard `coding` task, which asks an
 LLM to assign category codes to the text in `col` based on a set of
-coding `rules`. The databoard server pre-processes the rules to embed
+coding `rules`. The Databoard server pre-processes the rules to embed
 them in the prompt, and post-processes the LLM answer to split it into
 columns for a data frame.
 
@@ -96,7 +96,7 @@ If present in the prompts, the placeholder `{{text}}` is replaced by the
 value of the current case. The placeholder `{{rules}}` is replaced by a
 rule book generated from the rules data frame.
 
-See the databoard documentation for further options.
+See the Databoard documentation for further options.
 
 ## See also
 

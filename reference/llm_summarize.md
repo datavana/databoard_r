@@ -3,7 +3,7 @@
 Submits each row of `data` to the Databoard `summarize` task, which asks
 an LLM to summarise the text in `col`. Optionally, a `rules` data frame
 can be provided to produce structured, per-category summaries. The
-databoard server pre-processes the rules to embed them in the prompt,
+Databoard server pre-processes the rules to embed them in the prompt,
 and post-processes the LLM answer to split it into columns for a data
 frame.
 
@@ -89,7 +89,7 @@ If present in the prompts, the placeholder `{{text}}` is replaced by the
 value of the current case. The placeholder `{{rules}}` is replaced by a
 rule book generated from the rules data frame.
 
-See the databoard documentation for further options.
+See the Databoard documentation for further options.
 
 ## See also
 
