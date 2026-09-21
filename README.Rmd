@@ -25,13 +25,31 @@ knitr::opts_chunk$set(
 
 <a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
 
-The Databoard package is designed to interface with the Databoard service, 
-enabling automated content coding via large language models. 
+The Databoard package is designed to interface with the [Databoard service](https://databoard.uni-muenster.de/), 
+enabling automated content coding via large language models . The service provides 
+three main workflows: 
 
-The primary purpose of this package is to streamline work in R: 
-by providing a minimal set of intuitive functions, 
-it simplifies the process of submitting content for analysis and 
-retrieving structured output — reducing setup overhead and facilitating reproducible workflows.
+- *Code text*: Code text into predefined categories, for example, for content analysis.
+- *Summarize text*: Summarize longer texts into shorter paragraphs or individual words, 
+for example, for topic extraction.
+- *Annotate text*: Mark up text passages with XML according to predefined 
+selection rules, for example, for Named Entity Recognition.
+
+## General information
+
+The Databoard service, relies on the [FastAPI](https://databoard.uni-muenster.de/docs))
+and uses the UniGPT from the University of Muenster. The default model is `Llama-3.3-70B`. You can choose from a variety of other models, including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b` and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers. 
+
+The Databoard service employs 
+
+You can also
+customize the Please see the
+`vignette("customprompts")` for further options and high to change the model. 
+
+
+
+Please note, that generally a rate-limit of XX pertains for all XX. If you need 
+a higher rate-limit for
 
 ## How to install the Databoard package?
 
@@ -64,13 +82,6 @@ This login process stores your access token for the Databoard API service invisi
 The login lasts for one session, after closing RStudio you have to renew the login process. 
 
 ## How to use the Databoard package?
-
-The service provides three main functions: 
-
-- code text
-- summarize text
-- annotate text
-
 
 ```{r,  eval=FALSE}
 
@@ -106,7 +117,8 @@ results |>
 
 ```
 
-See the [introduction vignette](https://datavana.github.io/databoard_r/articles/gettingstarted.html) for further examples.
+See the [introduction vignette](https://datavana.github.io/databoard_r/articles/gettingstarted.html) for further information and examples.
+
 
 ## Authors and citation
 
