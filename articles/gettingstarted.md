@@ -3,7 +3,7 @@
 ## Introduction to the Databoard package
 
 With the Datavana Databoard service you can easily feed content into an
-LLM for automated analyses.´ After you submitted tasks, the data is
+LLM for automated analyses. After you submitted tasks, the data is
 processed in the background. Therefore, working with the service, always
 implies a two-step procedure. Firstly, submit tasks and let the service
 do its work. Secondly, retrieve results.
@@ -28,8 +28,9 @@ The predefined methods are based on pre-composed prompt templates and
 include pre- and post-processing steps aligned to the workflow. You can
 customize the prompts and several other options exposed by the service.
 
-To gain full flexibility, use custom prompts and by-pass the processing
-steps:
+To gain full flexibility, use [custom
+prompts](https://datavana.github.io/databoard_r/articles/customprompts.html)
+and by-pass the processing steps:
 
 - [`llm_prompt()`](https://datavana.github.io/databoard_r/reference/llm_prompt.md)
   fetches LLM answers using your own prompt templates.
@@ -221,4 +222,4 @@ segments <- results |>
 
 Customize your prompts and learn about additional model parameters in
 the
-[`vignette("customprompts")`](https://datavana.github.io/databoard_r/articles/customprompts.md)vignette.
+[`vignette("customprompts")`](https://datavana.github.io/databoard_r/articles/customprompts.md).
