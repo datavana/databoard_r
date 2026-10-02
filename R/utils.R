@@ -59,3 +59,14 @@ parse_json <- function(resp) {
 
   body
 }
+
+#' Check whether a value is empty
+#'
+#' @param value The value to check
+#' @return Returns `TRUE` for null values, non-character values or empty characters.
+#'         Otherwise `FALSE`.
+#'
+#' @keywords internal
+is_blank <- function(value) {
+  return (is.null(value) || !is.character(value) || (value == ""))
+}

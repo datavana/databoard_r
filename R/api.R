@@ -84,6 +84,76 @@ da_login <- function(username, password, server = getOption("databoard.baseurl",
   }
 }
 
+#' Set an external LLM server and access token
+#'
+#' By default, the databoard serves channels requests into UniGPT,
+#' an LLM server operated by the University of Münster.
+#' To use other LLM servers, you need their adress and an access token.
+#' Both are passed to the databoard for processing the prompts.
+#' The access token is not persisted on the server, but stored in the broker queue
+#' until the job was picked up.
+#' Furthermore, also make sure to pass a valid model name that is supported by the LLM server.
+#'
+#' For example, if you are affiliated with a German research institution, you can obtain API access to
+#' Blabador, a service operated by the Jülich research center, by following the instructions in the documentation:
+#' https://sdlaml.pages.jsc.fz-juelich.de/ai/guides/blablador_api_access/
+#'
+#' Blabador supports a range of models such as 'alias-apertus'.
+#'
+#' @param llm_server URL of the external server, e.g. "https://api.blablador.fz-juelich.de/v1/" for the blabador service.
+#'                  If missing, the user is prompted interactively.
+#'                  Set to `FALSE` for using the databoard defaults.
+#' @param llm_token Access token for the external server.
+#'                  If missing, the user is prompted interactively with a masked prompt
+#'                  (via the `askpass` package if available, otherwise an unmasked `readline()` fallback).
+#'                  Set to `FALSE` for using the databoard defaults.
+#' @param llm_model The model used in the following requests
+da_setup <- function(llm_server = NULL, llm_accesstoken = NULL, llm_model = NULL) {
+
+  if (missing(llm_server)) {
+    if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
+      llm_server <- rstudioapi::showPrompt(
+        title   = "LLM server adress",
+        message = "Please, enter the URL of the LLM server to use for following requests:",
+        default = ""
+      )
+    } else {
+      llm_server <- readline(prompt = "Please, enter the URL of the LLM server to use for following requests:")
+    }
+  }
+
+  if (missing(llm_accesstoken)) {
+    if (requireNamespace("rstudioapi", quietly = TRUE) && rstudioapi::isAvailable()) {
+      llm_accesstoken <- rstudioapi::showPrompt(
+        title   = "LLM server access token",
+        message = "Please, enter the access token to use with the LLM server:",
+        default = ""
+      )
+    } else {
+      llm_accesstoken <- readline(prompt = "Please, enter the access token to use with the LLM server:")
+    }
+  }
+
+  if (is.null(llm_server) || is.null(llm_accesstoken) || !nzchar(llm_server) || !nzchar(llm_accesstoken)) {
+    llm_server <- ""
+    llm_accesstoken <- ""
+  }
+
+  if (is.null(llm_model)) {
+    llm_model <- ""
+  }
+
+  settings <- list(
+    DATABOARD_LLM_SERVER = llm_server,
+    DATABOARD_LLM_ACCESSTOKEN = llm_accesstoken,
+    DATABOARD_LLM_MODEL = llm_model
+  )
+
+  do.call(Sys.setenv, settings)
+
+  return(invisible(TRUE))
+}
+
 #' Log out from the Databoard service
 #'
 #' Clears the environment variables set by [da_login()]
@@ -479,6 +549,23 @@ tasks_run_post <- function(task, input, options, wait = 0) {
     stop("Error: empty input data.", call. = FALSE)
   }
 
+
+  # Inject third-party LLM server settings from the global settings
+  llm_server <- Sys.getenv("DATABOARD_LLM_SERVER")
+  llm_accesstoken <- Sys.getenv("DATABOARD_LLM_ACCESSTOKEN")
+
+  if (is.null(options$server) && !is_blank(llm_server) && !is_blank(llm_accesstoken)) {
+    options$server <- list(
+      url = llm_server,
+      accesstoken = llm_accesstoken
+    )
+  }
+
+  # Inject model settings from the global settings
+  llm_model <- Sys.getenv("DATABOARD_LLM_MODEL")
+  if (is.null(options$model) && !is_blank(llm_model)) {
+    options$model <- llm_model
+  }
 
   endpoint <- "/tasks/run"
   body <- list(

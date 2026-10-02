@@ -11,9 +11,7 @@ editor_options:
 
 ```{r setup, include=F}
 
-library(dplyr)
-library(tibble)
-
+library(tidyverse)
 knitr::opts_chunk$set(eval=FALSE, include=TRUE)
 ```
 
@@ -209,6 +207,38 @@ results <- llm_code(
   )
 )
 
+results <- llm_code(results)
+
+```
+
+
+## Third-party LLM servers
+
+By default, the Databoard service uses the GPT-Server hosted by the University of Münster.
+You can connect to other LLM servers by providing the server URL, an access token and the model name.
+
+```{r}
+
+da_setup(
+  llm_server = "https://api.blablador.fz-juelich.de/v1/",
+  llm_accesstoken = "YOUTACCESSTOKEN",
+  llm_model = "alias-apertus"
+)
+```
+
+Subsequent calls to the Databoard service will use the provided server and model.
+The server and access token are temporarily stored in the Databoard task queue.
+They are deleted whenn the task was picked up by one of the Databoard workers.
+
+```{r}
+
+df <- databoard::movies
+rules <- databoard::genres
+
+# Submit jobs
+results <- llm_code(df, abstract, rules)
+
+# Fetch results
 results <- llm_code(results)
 
 ```
