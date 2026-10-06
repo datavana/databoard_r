@@ -37,7 +37,7 @@ selection rules, for example, for Named Entity Recognition.
 
 ## General information
 
-The Databoard service, relies on the [FastAPI](https://databoard.uni-muenster.de/docs))
+The Databoard service, relies on the [FastAPI](https://databoard.uni-muenster.de/docs)
 and uses the UniGPT from the University of Muenster. The default model is `Llama-3.3-70B`. You can choose from a variety of other models, including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b` and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers. Please see the
 `vignette("customprompts")` for further options and high to change the model. 
 
