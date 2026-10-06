@@ -1,15 +1,30 @@
 # Databoard Package
 
-The databoard package is designed to interface with the databoard
-service, enabling automated content coding via large language models.
+The Databoard package is designed to interface with the [Databoard
+service](https://databoard.uni-muenster.de/), enabling automated content
+coding via large language models . The service provides three main
+workflows:
 
-The primary purpose of this package is to streamline work in R: by
-providing a minimal set of intuitive functions, it simplifies the
-process of submitting content for analysis and retrieving structured
-output — reducing setup overhead and facilitating reproducible
-workflows.
+- *Code text*: Code text into predefined categories, for example, for
+  content analysis.
+- *Summarize text*: Summarize longer texts into shorter paragraphs or
+  individual words, for example, for topic extraction.
+- *Annotate text*: Mark up text passages with XML according to
+  predefined selection rules, for example, for Named Entity Recognition.
 
-## How to install the databoard package?
+## General information
+
+The Databoard service, relies on the
+[FastAPI](https://databoard.uni-muenster.de/docs) and uses the UniGPT
+from the University of Muenster. The default model is `Llama-3.3-70B`.
+You can choose from a variety of other models, including
+`mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b` and
+`Apertus-8B-Instruct-2509` as well as integrate other LLM-servers.
+Please see the
+[`vignette("customprompts")`](https://datavana.github.io/databoard_r/articles/customprompts.md)
+for further options and high to change the model.
+
+## How to install the Databoard package?
 
 Databoard can be installed from source using the remotes package.
 
@@ -20,7 +35,7 @@ library(remotes)
 remotes::install_github("datavana/databoard_r", build_manual = TRUE, build_vignettes = TRUE)
 ```
 
-To use the databoard service you need credentials. Please contact the
+To use the Databoard service you need credentials. Please contact the
 [Digital Media and Computational
 Methods](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml)
 research unit to obtain a username and password.
@@ -37,17 +52,11 @@ library(databoard)
 da_login()
 ```
 
-This login process stores your access token for the databoard API
+This login process stores your access token for the Databoard API
 service invisibly in the system environment. The login lasts for one
 session, after closing RStudio you have to renew the login process.
 
-## How to use the databoard package?
-
-The service provides three main functions:
-
-- code text
-- summarize text
-- annotate text
+## How to use the Databoard package?
 
 ``` r
 
@@ -68,7 +77,7 @@ rules <- tibble::tribble(
   "Drama",    "Serious stories focused on relationships, and character development.",     "Forrest Gump, A Beautiful Mind"
 )
 
-# Submit to the databoard service
+# Submit to the Databoard service
 results <- llm_code(movies, abstract, rules)
 
 # Once you submitted your tasks, 
@@ -85,7 +94,7 @@ results |>
 
 See the [introduction
 vignette](https://datavana.github.io/databoard_r/articles/gettingstarted.html)
-for further examples.
+for further information and examples.
 
 ## Authors and citation
 
