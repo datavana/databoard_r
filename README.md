@@ -21,15 +21,13 @@ workflows:
 - *Annotate text*: Mark up text passages with XML according to
   predefined selection rules, for example, for Named Entity Recognition.
 
-## General information
-
-The Databoard service, relies on the
-[FastAPI](https://databoard.uni-muenster.de/docs) and uses the UniGPT
-from the University of Muenster. The default model is `Llama-3.3-70B`.
-You can choose from a variety of other models, including
-`mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b` and
-`Apertus-8B-Instruct-2509` as well as integrate other LLM-servers.
-Please see the `vignette("customprompts")` for further options and high
+The Databoard service provides an
+[API](https://databoard.uni-muenster.de/docs) to access the UniGPT
+service from the University of Münster. The default model is
+`Llama-3.3-70B`. You can choose from a variety of other models,
+including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b`
+and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers.
+Please see the `vignette("customprompts")` for further options and how
 to change the model.
 
 ## How to install the Databoard package?
@@ -110,4 +108,4 @@ Jakob Jünger (University of Münster)
 **Citation**  
 
 Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding
-with Large Language Models. R package version 0.0.0.9000.
+with Large Language Models. R package version 1.0.0.
