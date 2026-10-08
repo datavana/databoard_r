@@ -1,0 +1,96 @@
+---
+title: "Example for annotating transcripts and saving the results to a REFI file"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{REFI}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=F}
+
+library(tidyverse)
+library(striprtf)
+
+knitr::opts_chunk$set(eval=FALSE, include=TRUE)
+```
+
+# Login to the Databoard
+
+```{r}
+library(databoard)
+da_login()
+```
+
+# Load transcripts and prepare a codebook
+
+Place your transcripts as rtf files in the private/transcripts folder.
+
+```{r}
+files <- list.files("private/transcripts", pattern = "\\.rtf$", full.names = TRUE)
+df <- sapply(files, function(f) paste(read_rtf(f), collapse = "\n"))
+df <- data.frame(file = basename(files), text = df, row.names = NULL)
+```
+
+Create a codebook with annotation rules.
+
+```{r}
+rules <- tibble::tribble(
+  ~category, ~description, ~example,
+  "ACTIVE", "Aussagen zur aktiven Nutzung von Funktionen (Kommentieren, Liken, Weiterleiten, Beiträge erstelle etc.).", "Und ja, da gehe ich ab und zu mal durch und like die mal durch.",
+  "PASSIVE", "Aussagen zur Wahrnehmung von Markierungen bzw. Traces (Likes, Kommentare, Hashtags, Links, Mentions etc.)", "Viele Views bedeuten dass Kampagnen laufen"
+)
+
+```
+
+Optionally, reduce your dataset to a smaller test sample
+
+```{r}
+df <- df |>
+  mutate(text = str_remove_all(text, "<[^>]+>")) |>
+  chunk_text(text, maxsize = 2000, overlap = 10) |>
+  slice_head(n=10)
+```
+
+# Submit and poll results
+
+```{r}
+results <- df |>
+  llm_annotate(
+    text, rules,
+
+    options = list (
+      prompts = list(
+        system = paste0(
+          "You are a researcher. Your task is to wrap sentences in XML tags. ",
+          "Use the annotation rules provided to annotate matching sentences. ",
+          "Please carefully read the input text and determine for each sentence ",
+          "whether one of the annotation rules applies.",
+          "If a rule applies, wrap the matching sentence with the XML tag `<anno>`. ",
+          "Always annotate sentences or phrases, not single words.",
+          "Set the value attribute of the XML tag to the respective attribute value provided in the rule. ",
+          "Answer with the provided text including the new XML tags.",
+          "Return no explanation, no disclaimer and no other markers"
+        ),
+        user = paste0(
+          "Be careful not to change the original text, just insert the XML tags. ",
+          "Your output starts and ends exactly as the provided text. \n\n",
+          "# Annotation rules:\n",
+          "{{rules}}\n\n",
+          "# Text to annotate:\n",
+          "{{text}}"
+        )
+      )
+    ),
+    poll = TRUE
+  )
+```
+
+# Save to REFI file
+
+```{r}
+as_refi(results, "private/databoard.qdpx", text_col = "llm_result", name_col = "file")
+```
+
