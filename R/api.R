@@ -271,7 +271,7 @@ da_fetch <- function(data, wait = 10, poll = FALSE, interval = 5, timeout = Inf)
 
         if (!poll || !authorized) break
 
-        report_round(data, round, start)
+        cli_round(data, round, start)
         if (!any(data$.task_state %in% "PENDING")) break
 
         elapsed <- as.numeric(difftime(Sys.time(), start, units = "secs"))
@@ -279,7 +279,7 @@ da_fetch <- function(data, wait = 10, poll = FALSE, interval = 5, timeout = Inf)
           timed_out <- TRUE
           break
         }
-        countdown(interval)
+        cli_countdown(interval)
       }
     },
     interrupt = function(e) {
@@ -672,3 +672,46 @@ check_succesful <- function(resp) {
 
   successful
 }
+
+#' Print a summary of task states after a polling round
+#'
+#' @param data A data frame with a `.task_state` column.
+#' @param round Integer. The current round number.
+#' @param start POSIXct. Start time of polling.
+#' @return Called for its side effect (console output). Returns `NULL`
+#'   invisibly.
+#' @keywords internal
+#' @noRd
+cli_round <- function(data, round, start) {
+  states <- table(data$.task_state, useNA = "ifany")
+  names(states)[is.na(names(states))] <- "NA"
+  summary <- paste(paste0(names(states), ": ", as.integer(states)), collapse = ", ")
+  cli::cli_alert_info("Round {round} ({format_elapsed(start)}) - {summary}")
+  invisible(NULL)
+}
+
+
+#' Wait with a live countdown
+#'
+#' Sleeps in one-second steps and shows the remaining time on a single,
+#' overwritten console line. `Sys.sleep()` is interruptible, so the user can
+#' stop during the wait.
+#'
+#' @param seconds Numeric. Total seconds to wait.
+#' @return Called for its side effect. Returns `NULL` invisibly.
+#' @keywords internal
+#' @noRd
+cli_countdown <- function(seconds) {
+  if (seconds <= 0) return(invisible(NULL))
+  remaining <- ceiling(seconds)
+  while (remaining > 0) {
+    message(sprintf("\rNext check in %ds (Esc/Ctrl+C to stop) ", remaining),
+            appendLF = FALSE)
+    Sys.sleep(min(1, remaining))
+    remaining <- remaining - 1
+  }
+  message("\r", strrep(" ", 45), "\r", appendLF = FALSE)
+  invisible(NULL)
+}
+
+

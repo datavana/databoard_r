@@ -59,3 +59,18 @@ parse_json <- function(resp) {
 
   body
 }
+
+#' Format time elapsed since a start time
+#'
+#' @param start POSIXct. Start time.
+#' @return A string such as `"1m 05s"` or `"42s"`.
+#' @keywords internal
+#' @noRd
+format_elapsed <- function(start) {
+  secs <- round(as.numeric(difftime(Sys.time(), start, units = "secs")))
+  if (secs < 60) {
+    sprintf("%ds", secs)
+  } else {
+    sprintf("%dm %02ds", secs %/% 60, secs %% 60)
+  }
+}
