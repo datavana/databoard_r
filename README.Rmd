@@ -46,7 +46,7 @@ Please see the `vignette("customprompts")` for further options and how
 to change the model.
 
 To ensure reliable service for all users, the Databoard service features a rate limit 
-of 30 requests per 60 seconds. If you need a higher rate limit for your research, 
+of 30 requests per 60 seconds. If you need a higher rate limit for your research 
 you can submit a request for an increase [here](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml).
 
 ## How to install the Databoard package?
