@@ -24,6 +24,6 @@ Splits \code{x} at the first separator in \code{separators} that occurs in the
 text. Pieces that fit into \code{maxsize} are collected and merged with
 \code{\link[=merge_pieces]{merge_pieces()}}. Pieces that are still too long are split recursively
 with the remaining, finer separators. The empty separator \code{""} triggers
-a hard character-level split via \code{\link[=hard_split]{hard_split()}}.
+a hard character-level split via \code{\link[=split_hard]{split_hard()}}.
 }
 \keyword{internal}

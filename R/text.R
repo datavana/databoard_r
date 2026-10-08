@@ -59,6 +59,7 @@
 #'   separators = c("\n\\s*\n", "\n", "(?<=[.!?])\\s+", "[ \t]+")
 #' )
 #'
+#' @keywords internal
 #' @export
 chunk_text <- function(
   df, col,
@@ -116,6 +117,51 @@ chunk_text <- function(
     tibble::as_tibble()
 }
 
+#' Recursively split text using a hierarchy of separators
+#'
+#' Splits `x` at the first separator in `separators` that occurs in the
+#' text. Pieces that fit into `maxsize` are collected and merged with
+#' [merge_pieces()]. Pieces that are still too long are split recursively
+#' with the remaining, finer separators. The empty separator `""` triggers
+#' a hard character-level split via [split_hard()].
+#'
+#' @param x A single character string.
+#' @param maxsize Maximum chunk size in characters.
+#' @param overlap Target overlap in characters.
+#' @param separators Character vector of regexes, ordered from coarsest to
+#'   finest, ending with `""`.
+#'
+#' @return A character vector of chunks, each at most `maxsize` characters.
+#'
+#' @keywords internal
+split_recursive <- function(x, maxsize, overlap, separators) {
+  if (stringr::str_length(x) <= maxsize) {
+    return(x)
+  }
+
+  # first separator that actually occurs in x ("" always matches)
+  idx  <- purrr::detect_index(separators, \(s) s == "" || stringr::str_detect(x, s))
+  sep  <- separators[idx]
+  rest <- separators[-seq_len(idx)]
+
+  if (sep == "") {
+    return(split_hard(x, maxsize, overlap))
+  }
+
+  out    <- character()
+  buffer <- character()
+  for (p in split_keep(x, sep)) {
+    if (stringr::str_length(p) <= maxsize) {
+      buffer <- c(buffer, p)
+    } else {
+      # flush collected small pieces, then recurse into the oversized one
+      out    <- c(out, merge_pieces(buffer, maxsize, overlap))
+      buffer <- character()
+      out    <- c(out, split_recursive(p, maxsize, overlap, rest))
+    }
+  }
+  c(out, merge_pieces(buffer, maxsize, overlap))
+}
 
 #' Split a single text into trimmed chunks
 #'
@@ -139,54 +185,6 @@ split_text <- function(x, maxsize, overlap, separators) {
     stringr::str_trim()
   chunks[chunks != ""]
 }
-
-
-#' Recursively split text using a hierarchy of separators
-#'
-#' Splits `x` at the first separator in `separators` that occurs in the
-#' text. Pieces that fit into `maxsize` are collected and merged with
-#' [merge_pieces()]. Pieces that are still too long are split recursively
-#' with the remaining, finer separators. The empty separator `""` triggers
-#' a hard character-level split via [hard_split()].
-#'
-#' @param x A single character string.
-#' @param maxsize Maximum chunk size in characters.
-#' @param overlap Target overlap in characters.
-#' @param separators Character vector of regexes, ordered from coarsest to
-#'   finest, ending with `""`.
-#'
-#' @return A character vector of chunks, each at most `maxsize` characters.
-#'
-#' @keywords internal
-split_recursive <- function(x, maxsize, overlap, separators) {
-  if (stringr::str_length(x) <= maxsize) {
-    return(x)
-  }
-
-  # first separator that actually occurs in x ("" always matches)
-  idx  <- purrr::detect_index(separators, \(s) s == "" || stringr::str_detect(x, s))
-  sep  <- separators[idx]
-  rest <- separators[-seq_len(idx)]
-
-  if (sep == "") {
-    return(hard_split(x, maxsize, overlap))
-  }
-
-  out    <- character()
-  buffer <- character()
-  for (p in split_keep(x, sep)) {
-    if (stringr::str_length(p) <= maxsize) {
-      buffer <- c(buffer, p)
-    } else {
-      # flush collected small pieces, then recurse into the oversized one
-      out    <- c(out, merge_pieces(buffer, maxsize, overlap))
-      buffer <- character()
-      out    <- c(out, split_recursive(p, maxsize, overlap, rest))
-    }
-  }
-  c(out, merge_pieces(buffer, maxsize, overlap))
-}
-
 
 #' Split a string at a regex, keeping the separators
 #'
@@ -227,7 +225,7 @@ split_keep <- function(x, sep) {
 #' @return A character vector of chunks, each at most `maxsize` characters.
 #'
 #' @keywords internal
-hard_split <- function(x, maxsize, overlap) {
+split_hard <- function(x, maxsize, overlap) {
   n      <- stringr::str_length(x)
   starts <- seq(1L, n, by = maxsize - overlap)
   starts <- starts[starts == 1L | starts + overlap <= n]
