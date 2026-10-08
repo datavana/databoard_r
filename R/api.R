@@ -168,52 +168,143 @@ da_submit <- function(data, col, task, options, wait = 0) {
 
 #' Fetch results for previously submitted tasks
 #'
-#' Iterates over rows of `data` and retrieves results for any task that is
-#' still in the `PENDING` state. Newly received results overwrite the
-#' corresponding rows' `.task_state` and `.task_result` values, and are
-#' unnested into regular columns.
+#' Retrieves results for all tasks in `data` that are still in the `PENDING`
+#' state. Newly received results overwrite the corresponding rows'
+#' `.task_state` and `.task_result` values, and are unnested into regular
+#' columns.
+#'
+#' With `poll = TRUE`, the function keeps fetching in rounds until no task is
+#' pending, the `timeout` is reached, or the user interrupts. After each round
+#' it prints a summary of task states and counts down to the next round.
+#'
+#' @section Interrupting:
+#' Press `Esc` (RStudio, Positron) or `Ctrl+C` (terminal) at any time to stop
+#' polling. The interrupt is caught, so the results collected so far are
+#' unnested and returned normally, e.g. `res <- da_fetch(df, poll = TRUE)`
+#' still assigns `res`. Call `da_fetch()` again on the result to resume.
 #'
 #' @param data A data frame previously produced by [da_submit()]. Must contain
 #'   a `.task_id` column.
 #' @param wait Integer. Seconds to wait server-side per request for the task
 #'   to complete before returning. Defaults to `10`.
+#' @param poll Logical. If `FALSE` (default), make a single pass over pending
+#'   tasks. If `TRUE`, repeat until no task is pending, `timeout` is reached,
+#'   or the user interrupts.
+#' @param interval Numeric. Seconds to pause between polling rounds. Only
+#'   used when `poll = TRUE`. Defaults to `5`.
+#' @param timeout Numeric. Maximum total polling time in seconds. Defaults to
+#'   `Inf` (poll until done or interrupted).
 #'
 #' @return The input data frame with updated `.task_state` values and unnested
-#'   result columns.
+#'   result columns. If polling was interrupted or timed out, the results
+#'   received so far are returned.
+#'
+#' @examples
+#' \dontrun{
+#' res <- df |>
+#'   da_submit(text, rules) |>
+#'   da_fetch(poll = TRUE)
+#' }
 #'
 #' @export
-da_fetch <- function(data, wait = 10) {
+da_fetch <- function(data, wait = 10, poll = FALSE, interval = 5, timeout = Inf) {
 
-  # Prepare columns
-
+  # ---- validation ----------------------------------------------------------
   if (!(".task_id" %in% colnames(data))) {
-    stop("Error: The data frame lacks a task id column. First, submit tasks. ", call. = FALSE)
+    stop("The data frame lacks a task id column. First, submit tasks.", call. = FALSE)
   }
-
+  if (!is.logical(poll) || length(poll) != 1 || is.na(poll)) {
+    stop("`poll` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.numeric(interval) || length(interval) != 1 || interval < 0) {
+    stop("`interval` must be a single non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(timeout) || length(timeout) != 1 || timeout <= 0) {
+    stop("`timeout` must be a single positive number (or Inf).", call. = FALSE)
+  }
   if (!(".task_state" %in% colnames(data))) {
-    data$.task_state <- NA
+    data$.task_state <- NA_character_
   }
 
-  # Progress bar
-  n <- nrow(data)
-  pb <- progress::progress_bar$new(
-    format = "Fetching task results [:bar] :current/:total (:percent)",
-    total  = n, clear  = FALSE, width  = 60, show_after = 0,
-  )
-  pb$tick(0)
+  # ---- state ---------------------------------------------------------------
+  start       <- Sys.time()
+  round       <- 0L
+  interrupted <- FALSE
+  timed_out   <- FALSE
+  authorized  <- TRUE
 
-  # Main loop
-  for (i in seq_len(n)) {
+  if (poll) {
+    cli::cli_alert_info(
+      "Polling for results. Press {.kbd Esc} or {.kbd Ctrl+C} to stop and return the results collected so far."
+    )
+  }
 
-    if (data$.task_state[i] == "PENDING") {
-      resp <- tasks_run_get(data$.task_id[i], wait)
-      data <- da_extract(data, resp, i)
-      if (!check_authorized(resp)) {
-        break
+  # ---- main loop -----------------------------------------------------------
+  # `expr` is evaluated in this function's frame, so changes to `data` survive
+  # an interrupt. The handler only sets a flag via `<<-`.
+  tryCatch(
+    {
+      repeat {
+        pending <- which(data$.task_state %in% "PENDING")
+        if (length(pending) == 0) break
+        round <- round + 1L
+
+        pb <- progress::progress_bar$new(
+          format = if (poll) {
+            paste0("Round ", round, " [:bar] :current/:total pending (:percent)")
+          } else {
+            "Fetching task results [:bar] :current/:total (:percent)"
+          },
+          total = length(pending), clear = poll, width = 60, show_after = 0
+        )
+        pb$tick(0)
+
+        for (i in pending) {
+          resp <- tasks_run_get(data$.task_id[i], wait)
+          data <- da_extract(data, resp, i)
+          pb$tick()
+          if (!check_authorized(resp)) {
+            authorized <- FALSE
+            break
+          }
+        }
+
+        if (!poll || !authorized) break
+
+        report_round(data, round, start)
+        if (!any(data$.task_state %in% "PENDING")) break
+
+        elapsed <- as.numeric(difftime(Sys.time(), start, units = "secs"))
+        if (elapsed + interval >= timeout) {
+          timed_out <- TRUE
+          break
+        }
+        countdown(interval)
       }
+    },
+    interrupt = function(e) {
+      interrupted <<- TRUE
     }
-    pb$tick()
+  )
 
+  # ---- final feedback ------------------------------------------------------
+  n_pending <- sum(data$.task_state %in% "PENDING")
+
+  if (interrupted) {
+    cat("\n")
+    cli::cli_alert_warning(
+      "Polling interrupted. {n_pending} task{?s} still pending. Call {.fn da_fetch} again to resume."
+    )
+  } else if (timed_out) {
+    cli::cli_alert_warning(
+      "Timeout of {timeout}s reached. {n_pending} task{?s} still pending. Call {.fn da_fetch} again to resume."
+    )
+  } else if (!authorized) {
+    cli::cli_alert_danger("Not authorized. Stopped fetching.")
+  } else if (poll) {
+    cli::cli_alert_success(
+      "All tasks finished after {round} round{?s} ({format_elapsed(start)})."
+    )
   }
 
   data <- da_unnest(data)

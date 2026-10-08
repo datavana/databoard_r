@@ -61,6 +61,8 @@
 #'   * `0` (default): submit all tasks and return immediately with state
 #'     `PENDING`. Fetch results later by calling `llm_prompt(data)` again.
 #'   * `> 0`: wait up to that many seconds per case for the result.
+#' @param poll Logical. If `FALSE` (default), make a single pass over pending
+#'   tasks. If `TRUE`, repeat until no task is pending.
 #'
 #' @return The input data frame with the columns `.task_id` and `.task_state`
 #'   added. When results are available, the raw LLM answer for each case is
@@ -90,10 +92,10 @@
 #' }
 #'
 #' @export
-llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.user = NULL, options = list(), wait = 0) {
+llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.user = NULL, options = list(), wait = 0, poll = FALSE) {
 
   if (".task_id" %in% colnames(data)) {
-    return (da_fetch(data))
+    return (da_fetch(data, poll = poll))
   }
 
   if (!missing(rules)) {
@@ -168,6 +170,8 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
 #'   * `0` (default): submit all tasks and return immediately with state
 #'     `PENDING`. Fetch results later by calling `llm_code(data)` again.
 #'   * `> 0`: wait up to that many seconds per case for the result.
+#' @param poll Logical. If `FALSE` (default), make a single pass over pending
+#'   tasks. If `TRUE`, repeat until no task is pending.
 #'
 #' @return The input data frame with the columns `.task_id` and `.task_state`
 #'   added. When results are available, they are unnested into additional
@@ -192,10 +196,10 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
 #' }
 #'
 #' @export
-llm_code <- function(data, col, rules = NULL, mode = "single", options = list(), wait = 0) {
+llm_code <- function(data, col, rules = NULL, mode = "single", options = list(), wait = 0, poll = FALSE) {
 
   if (".task_id" %in% colnames(data)) {
-    return (da_fetch(data))
+    return (da_fetch(data, poll = poll))
   }
 
   options$rules <- purrr::transpose(rules)
@@ -269,6 +273,8 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #'   * `0` (default): submit all tasks and return immediately with state
 #'     `PENDING`. Fetch results later by calling `llm_summarize(data)` again.
 #'   * `> 0`: wait up to that many seconds per case for the result.
+#' @param poll Logical. If `FALSE` (default), make a single pass over pending
+#'   tasks. If `TRUE`, repeat until no task is pending.
 #'
 #' @return The input data frame with the columns `.task_id` and `.task_state`
 #'   added. When results are available, they are unnested into additional
@@ -293,10 +299,10 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
 #' }
 #'
 #' @export
-llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
+llm_summarize <- function(data, col, rules, options = list(), wait = 0, poll = FALSE) {
 
   if (".task_id" %in% colnames(data)) {
-    return (da_fetch(data))
+    return (da_fetch(data, poll = poll))
   }
 
   if (!missing(rules)) {
@@ -352,6 +358,9 @@ llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
 #'   * `0` (default): submit all tasks and return immediately with state
 #'     `PENDING`. Fetch results later by calling `llm_annotate(data)` again.
 #'   * `> 0`: wait up to that many seconds per case for the result.
+#' @param poll Logical. If `FALSE` (default), make a single pass over pending
+#'   tasks. If `TRUE`, repeat until no task is pending.
+#'
 #' @return The input data frame with the columns `.task_id` and `.task_state`
 #'   added. When results are available, they are unnested into additional
 #'   result columns (e.g. `llm_result`). For annotation tasks, `llm_annos`
@@ -380,10 +389,10 @@ llm_summarize <- function(data, col, rules, options = list(), wait = 0) {
 #' }
 #'
 #' @export
-llm_annotate <- function(data, col, rules, options = list(), wait = 0) {
+llm_annotate <- function(data, col, rules, options = list(), wait = 0, poll = FALSE) {
 
   if (".task_id" %in% colnames(data)) {
-    return (da_fetch(data))
+    return (da_fetch(data, poll = poll))
   }
 
   if (missing(rules) || is.null(rules)) {
