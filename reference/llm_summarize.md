@@ -10,7 +10,7 @@ frame.
 ## Usage
 
 ``` r
-llm_summarize(data, col, rules, options = list(), wait = 0)
+llm_summarize(data, col, rules, options = list(), wait = 0, poll = FALSE)
 ```
 
 ## Arguments
@@ -47,6 +47,11 @@ llm_summarize(data, col, rules, options = list(), wait = 0)
     again.
 
   - `> 0`: wait up to that many seconds per case for the result.
+
+- poll:
+
+  Logical. If `FALSE` (default), make a single pass over pending tasks.
+  If `TRUE`, repeat until no task is pending.
 
 ## Value
 

@@ -9,7 +9,15 @@ columns for a data frame.
 ## Usage
 
 ``` r
-llm_code(data, col, rules = NULL, mode = "single", options = list(), wait = 0)
+llm_code(
+  data,
+  col,
+  rules = NULL,
+  mode = "single",
+  options = list(),
+  wait = 0,
+  poll = FALSE
+)
 ```
 
 ## Arguments
@@ -54,6 +62,11 @@ llm_code(data, col, rules = NULL, mode = "single", options = list(), wait = 0)
     `PENDING`. Fetch results later by calling `llm_code(data)` again.
 
   - `> 0`: wait up to that many seconds per case for the result.
+
+- poll:
+
+  Logical. If `FALSE` (default), make a single pass over pending tasks.
+  If `TRUE`, repeat until no task is pending.
 
 ## Value
 

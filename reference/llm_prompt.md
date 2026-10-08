@@ -20,7 +20,8 @@ llm_prompt(
   prompt.system = NULL,
   prompt.user = NULL,
   options = list(),
-  wait = 0
+  wait = 0,
+  poll = FALSE
 )
 ```
 
@@ -71,6 +72,11 @@ llm_prompt(
     `PENDING`. Fetch results later by calling `llm_prompt(data)` again.
 
   - `> 0`: wait up to that many seconds per case for the result.
+
+- poll:
+
+  Logical. If `FALSE` (default), make a single pass over pending tasks.
+  If `TRUE`, repeat until no task is pending.
 
 ## Value
 
