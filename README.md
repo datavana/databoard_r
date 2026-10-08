@@ -9,8 +9,6 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-<a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
-
 The Databoard package is designed to interface with the [Databoard
 service](https://databoard.uni-muenster.de/), enabling automated content
 coding via large language models . The service provides three main
@@ -117,4 +115,4 @@ Jakob Jünger (University of Münster)
 **Citation**  
 
 Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding
-with Large Language Models. R package version 0.0.0.9000.
+with Large Language Models. R package version 1.0.0.
