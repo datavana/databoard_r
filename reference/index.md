@@ -29,7 +29,7 @@ Functions with full customazibility.
 
 ## Helper Functions
 
-Individual functions tp submit data to the databoard, fetch results and
+Individual functions to submit data to the databoard, fetch results and
 show the progress.
 
 - [`da_submit()`](https://datavana.github.io/databoard_r/reference/da_submit.md)

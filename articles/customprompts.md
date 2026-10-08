@@ -201,9 +201,10 @@ results <- llm_summarize(results)
 The workflow wrappers forward model-related settings via the `options`
 list. The most common ones are:
 
-- **model**: choose the LLM model to use.
+- **model**: choose the LLM model to use. The default is
+  `Llama-3.3-70B`.
 - **temperature**: control how deterministic or varied the answer should
-  be.
+  be. The default is `NOT_GIVEN`.
 
 See the Databoard [API
 documentation](https://databoard.uni-muenster.de/docs#/default/task_add_tasks_run_post)
