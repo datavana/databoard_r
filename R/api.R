@@ -419,7 +419,7 @@ da_unnest <- function(data) {
   if ("llm_result" %in% colnames(out)) {
     has_anno_tags <- any(!is.na(out$llm_result) & grepl("<anno\\b", out$llm_result, perl = TRUE))
     if (has_anno_tags) {
-      out$llm_annos <- lapply(out$llm_result, extract_annos)
+      out$llm_annos <- lapply(out$llm_result, anno_extract)
     }
   }
 

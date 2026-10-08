@@ -4,7 +4,7 @@
 \alias{llm_summarize}
 \title{Automated content summarisation with an LLM}
 \usage{
-llm_summarize(data, col, rules, options = list(), wait = 0)
+llm_summarize(data, col, rules, options = list(), wait = 0, poll = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing the texts to be summarised, or a data
@@ -29,6 +29,9 @@ complete before returning.
 \code{PENDING}. Fetch results later by calling \code{llm_summarize(data)} again.
 \item \verb{> 0}: wait up to that many seconds per case for the result.
 }}
+
+\item{poll}{Logical. If \code{FALSE} (default), make a single pass over pending
+tasks. If \code{TRUE}, repeat until no task is pending.}
 }
 \value{
 The input data frame with the columns \code{.task_id} and \code{.task_state}

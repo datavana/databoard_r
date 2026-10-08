@@ -4,7 +4,7 @@
 \alias{da_fetch}
 \title{Fetch results for previously submitted tasks}
 \usage{
-da_fetch(data, wait = 10)
+da_fetch(data, wait = 10, poll = FALSE, interval = 5, timeout = Inf)
 }
 \arguments{
 \item{data}{A data frame previously produced by \code{\link[=da_submit]{da_submit()}}. Must contain
@@ -12,14 +12,46 @@ a \code{.task_id} column.}
 
 \item{wait}{Integer. Seconds to wait server-side per request for the task
 to complete before returning. Defaults to \code{10}.}
+
+\item{poll}{Logical. If \code{FALSE} (default), make a single pass over pending
+tasks. If \code{TRUE}, repeat until no task is pending, \code{timeout} is reached,
+or the user interrupts.}
+
+\item{interval}{Numeric. Seconds to pause between polling rounds. Only
+used when \code{poll = TRUE}. Defaults to \code{5}.}
+
+\item{timeout}{Numeric. Maximum total polling time in seconds. Defaults to
+\code{Inf} (poll until done or interrupted).}
 }
 \value{
 The input data frame with updated \code{.task_state} values and unnested
-result columns.
+result columns. If polling was interrupted or timed out, the results
+received so far are returned.
 }
 \description{
-Iterates over rows of \code{data} and retrieves results for any task that is
-still in the \code{PENDING} state. Newly received results overwrite the
-corresponding rows' \code{.task_state} and \code{.task_result} values, and are
-unnested into regular columns.
+Retrieves results for all tasks in \code{data} that are still in the \code{PENDING}
+state. Newly received results overwrite the corresponding rows'
+\code{.task_state} and \code{.task_result} values, and are unnested into regular
+columns.
+}
+\details{
+With \code{poll = TRUE}, the function keeps fetching in rounds until no task is
+pending, the \code{timeout} is reached, or the user interrupts. After each round
+it prints a summary of task states and counts down to the next round.
+}
+\section{Interrupting}{
+
+Press \code{Esc} (RStudio, Positron) or \code{Ctrl+C} (terminal) at any time to stop
+polling. The interrupt is caught, so the results collected so far are
+unnested and returned normally, e.g. \code{res <- da_fetch(df, poll = TRUE)}
+still assigns \code{res}. Call \code{da_fetch()} again on the result to resume.
+}
+
+\examples{
+\dontrun{
+res <- df |>
+  da_submit(text, rules) |>
+  da_fetch(poll = TRUE)
+}
+
 }

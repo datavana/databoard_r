@@ -1,42 +1,3 @@
-#' Extract annotation spans from llm_result
-#'
-#' Internal helper used by `llm_annotate()`: parses `<anno value="...">...</anno>`
-#' tags and returns a tibble with `value` and `segment`.
-#'
-#' @param text Character scalar containing annotated text.
-#' @return A tibble with columns `value` and `segment`.
-#' @keywords internal
-extract_annos <- function(text) {
-
-  empty <- tibble::tibble(value = character(0), segment = character(0))
-
-  if (is.null(text) || length(text) != 1L || is.na(text)) {
-    return(empty)
-  }
-
-  text <- as.character(text)
-  if (!nzchar(trimws(text))) {
-    return(empty)
-  }
-
-  wrapped <- paste0("<root>", text, "</root>")
-  doc <- tryCatch(xml2::read_html(wrapped), error = function(e) NULL)
-  if (is.null(doc)) {
-    return(empty)
-  }
-
-  nodes <- xml2::xml_find_all(doc, ".//anno")
-  if (length(nodes) == 0L) {
-    return(empty)
-  }
-
-  tibble::tibble(
-    value = xml2::xml_attr(nodes, "value", default = ""),
-    segment = xml2::xml_text(nodes, trim = TRUE)
-  )
-}
-
-
 #' Parse JSON from a response
 #'
 #' Only try to parse JSON if the server actually returned JSON.
@@ -73,4 +34,49 @@ format_elapsed <- function(start) {
   } else {
     sprintf("%dm %02ds", secs %/% 60, secs %% 60)
   }
+}
+
+
+#' Total length covered by a set of ranges
+#'
+#' Computes the number of positions covered by the *union* of 1-based,
+#' inclusive integer ranges, so overlapping or nested ranges are counted only
+#' once. Zero-width ranges (`end < start`, e.g. from empty elements) and ranges
+#' containing `NA` are ignored.
+#'
+#' Equivalent to `sum(IRanges::width(IRanges::reduce(IRanges::IRanges(start,
+#' end))))`, but without the Bioconductor dependency.
+#'
+#' @keywords internal
+#'
+#' @param start,end Integer vectors of equal length with range boundaries
+#'   (1-based, inclusive).
+#' @return A single integer: the number of covered positions.
+#' @seealso [anno_ranges()]
+covered_length <- function(start, end) {
+  stopifnot(length(start) == length(end))
+
+  ok <- !is.na(start) & !is.na(end) & end >= start
+  if (!any(ok)) return(0L)
+
+  start <- as.integer(start[ok])
+  end   <- as.integer(end[ok])
+  o     <- order(start, end)
+  start <- start[o]
+  end   <- end[o]
+
+  total <- 0L
+  cur_s <- start[1]
+  cur_e <- end[1]
+  for (i in seq_along(start)[-1]) {
+    # overlapping or adjacent: merge
+    if (start[i] <= cur_e + 1L) {
+      cur_e <- max(cur_e, end[i])
+    } else {
+      total <- total + (cur_e - cur_s + 1L)
+      cur_s <- start[i]
+      cur_e <- end[i]
+    }
+  }
+  total + (cur_e - cur_s + 1L)
 }

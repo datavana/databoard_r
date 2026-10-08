@@ -11,7 +11,8 @@ llm_prompt(
   prompt.system = NULL,
   prompt.user = NULL,
   options = list(),
-  wait = 0
+  wait = 0,
+  poll = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ complete before returning.
 \code{PENDING}. Fetch results later by calling \code{llm_prompt(data)} again.
 \item \verb{> 0}: wait up to that many seconds per case for the result.
 }}
+
+\item{poll}{Logical. If \code{FALSE} (default), make a single pass over pending
+tasks. If \code{TRUE}, repeat until no task is pending.}
 }
 \value{
 The input data frame with the columns \code{.task_id} and \code{.task_state}
