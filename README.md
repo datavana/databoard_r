@@ -1,15 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Databoard Package
+# Databoard Package <img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" />
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
-
-<a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
 
 The Databoard package is designed to interface with the [Databoard
 service](https://databoard.uni-muenster.de/), enabling automated content
