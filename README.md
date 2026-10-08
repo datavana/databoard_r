@@ -1,13 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Databoard Package
+# Databoard Package <img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" />
 
 <!-- badges: start -->
 
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
-
-<a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
 
 The Databoard package is designed to interface with the [Databoard
 service](https://databoard.uni-muenster.de/), enabling automated content
@@ -21,6 +21,8 @@ workflows:
 - *Annotate text*: Mark up text passages with XML according to
   predefined selection rules, for example, for Named Entity Recognition.
 
+## General information
+
 The Databoard service provides an
 [API](https://databoard.uni-muenster.de/docs) to access the UniGPT
 service from the University of Münster. The default model is
@@ -29,6 +31,11 @@ including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b`
 and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers.
 Please see the `vignette("customprompts")` for further options and how
 to change the model.
+
+To ensure reliable service for all users, the Databoard service features
+a rate limit of 30 requests per 60 seconds. If you need a higher rate
+limit for your research, you can submit a request for an increase
+[here](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml).
 
 ## How to install the Databoard package?
 
