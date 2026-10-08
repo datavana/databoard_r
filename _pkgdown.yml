@@ -44,7 +44,7 @@ reference:
 
 - title: Helper Functions
   desc:  >
-      Individual functions tp submit data to the databoard,
+      Individual functions to submit data to the databoard,
       fetch results and show the progress.
 - contents:
   - da_submit
