@@ -61,7 +61,7 @@ as_refi <- function(
   user_name    = "Databoard",
   tagname      = "anno",
   code_attr    = "value",
-  code_sep     = NULL
+  code_sep     = "::"
 ) {
 
   # --- checks ---------------------------------------------------------------

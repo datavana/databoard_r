@@ -108,8 +108,12 @@ llm_prompt <- function(data, col, rules = NULL, prompt.system = NULL, prompt.use
     user = paste0(prompt.user, collapse = "\n")
   )
 
-  da_submit(data, {{ col }}, "summarize", options, wait)
+  data <- da_submit(data, {{ col }}, "summarize", options, wait)
+  if (poll) {
+    data <- da_fetch(data, poll = TRUE)
+  }
 
+  return(data)
 }
 
 
@@ -212,8 +216,13 @@ llm_code <- function(data, col, rules = NULL, mode = "single", options = list(),
     options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
   }
 
-  da_submit(data, {{ col }}, "coding", options, wait)
+  data <- da_submit(data, {{ col }}, "coding", options, wait)
 
+  if (poll) {
+    data <- da_fetch(data, poll = TRUE)
+  }
+
+  return(data)
 }
 
 #' Automated content summarisation with an LLM
@@ -319,8 +328,13 @@ llm_summarize <- function(data, col, rules, options = list(), wait = 0, poll = F
     options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
   }
 
-  da_submit(data, {{ col }}, "summarize", options, wait)
+  data <- da_submit(data, {{ col }}, "summarize", options, wait)
 
+  if (poll) {
+    data <- da_fetch(data, poll = TRUE)
+  }
+
+  return(data)
 }
 
 #' Automated annotation with an LLM
@@ -413,7 +427,12 @@ llm_annotate <- function(data, col, rules, options = list(), wait = 0, poll = FA
     options$prompts$user <- paste0(options$prompts$user, collapse = "\n")
   }
 
-  da_submit(data, {{ col }}, "annotate", options, wait)
+  data <- da_submit(data, {{ col }}, "annotate", options, wait)
 
+  if (poll) {
+    data <- da_fetch(data, poll = TRUE)
+  }
+
+  return(data)
 }
 
