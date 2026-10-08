@@ -1,5 +1,8 @@
 # Databoard Package
 
+[![Databoard
+logo](reference/figures/logo.png)](https://datavana.github.io/databoard_r/)
+
 The Databoard package is designed to interface with the [Databoard
 service](https://databoard.uni-muenster.de/), enabling automated content
 coding via large language models . The service provides three main
