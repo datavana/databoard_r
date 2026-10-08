@@ -1,10 +1,14 @@
-#' Extract annotation spans from llm_result
+#' Extract annotation spans from a character value
 #'
 #' Internal helper used by `llm_annotate()`: parses `<anno value="...">...</anno>`
-#' tags and returns a tibble with `value` and `segment`.
+#' tags and returns a tibble with `value` and `segment`. Parsing and span
+#' extraction are delegated to [anno_offsets()] and [anno_ranges()].
 #'
 #' @param text Character scalar containing annotated text.
+#' @param tagname Name of the annotation element.
+#' @param attrname Name of the attribute holding the annotation value.
 #' @return A tibble with columns `value` and `segment`.
+#' @seealso [anno_ranges()], [anno_offsets()]
 #' @keywords internal
 anno_extract <- function(text, tagname = "anno", attrname = "value") {
 
@@ -19,20 +23,29 @@ anno_extract <- function(text, tagname = "anno", attrname = "value") {
     return(empty)
   }
 
-  wrapped <- paste0("<root>", text, "</root>")
-  doc <- tryCatch(xml2::read_html(wrapped), error = function(e) NULL)
+  # Stamp *all* <tagname> elements, not only those carrying `attrname`,
+  # so that elements without the attribute are still returned (value = "").
+  doc <- tryCatch(
+    anno_offsets(text, tagname = tagname, attrname = NULL),
+    error = function(e) NULL
+  )
   if (is.null(doc)) {
     return(empty)
   }
 
-  nodes <- xml2::xml_find_all(doc, paste0(".//", tagname))
-  if (length(nodes) == 0L) {
+  pos <- anno_ranges(doc, attrname = attrname)$ranges[[1]]
+  if (is.null(pos) || nrow(pos) == 0L) {
     return(empty)
   }
 
+  value <- pos$value
+  value[is.na(value)] <- ""
+
   tibble::tibble(
-    value = xml2::xml_attr(nodes, attrname, default = ""),
-    segment = xml2::xml_text(nodes, trim = TRUE)
+    value   = value,
+    segment = trimws(pos$text),
+    start = pos$start,
+    end = pos$end
   )
 }
 

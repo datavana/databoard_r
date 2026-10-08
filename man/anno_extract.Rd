@@ -2,18 +2,26 @@
 % Please edit documentation in R/annos.R
 \name{anno_extract}
 \alias{anno_extract}
-\title{Extract annotation spans from llm_result}
+\title{Extract annotation spans from a character value}
 \usage{
 anno_extract(text, tagname = "anno", attrname = "value")
 }
 \arguments{
 \item{text}{Character scalar containing annotated text.}
+
+\item{tagname}{Name of the annotation element.}
+
+\item{attrname}{Name of the attribute holding the annotation value.}
 }
 \value{
 A tibble with columns \code{value} and \code{segment}.
 }
 \description{
 Internal helper used by \code{llm_annotate()}: parses \verb{<anno value="...">...</anno>}
-tags and returns a tibble with \code{value} and \code{segment}.
+tags and returns a tibble with \code{value} and \code{segment}. Parsing and span
+extraction are delegated to \code{\link[=anno_offsets]{anno_offsets()}} and \code{\link[=anno_ranges]{anno_ranges()}}.
+}
+\seealso{
+\code{\link[=anno_ranges]{anno_ranges()}}, \code{\link[=anno_offsets]{anno_offsets()}}
 }
 \keyword{internal}
