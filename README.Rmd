@@ -21,9 +21,8 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
-
-<a href="https://datavana.github.io/databoard_r/"><img src="man/figures/logo.png" align="right" height="139" alt="Databoard logo" style="margin-left:1em;" /></a>
 
 The Databoard package is designed to interface with the [Databoard service](https://databoard.uni-muenster.de/), 
 enabling automated content coding via large language models . The service provides 
@@ -37,19 +36,20 @@ selection rules, for example, for Named Entity Recognition.
 
 ## General information
 
-The Databoard service, relies on the [FastAPI](https://databoard.uni-muenster.de/docs))
-and uses the UniGPT from the University of Muenster. The default model is `Llama-3.3-70B`. You can choose from a variety of other models, including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b` and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers. 
 
-The Databoard service employs 
+The Databoard service provides an
+[API](https://databoard.uni-muenster.de/docs) to access the UniGPT
+service from the University of Münster. The default model is
+`Llama-3.3-70B`. You can choose from a variety of other models,
+including `mistral-small`, `gemma-3-27b-it`, `gemma-3`, `gpt-oss-120b`
+and `Apertus-8B-Instruct-2509` as well as integrate other LLM-servers.
+Please see the `vignette("customprompts")` for further options and how
+to change the model.
 
-You can also customize the 
-Please see the `vignette("customprompts")` for further options 
-and high to change the model. 
+To ensure reliable service for all users, the Databoard service features a rate limit 
+of 30 requests per 60 seconds. If you need a higher rate limit for your research 
+you can submit a request for an increase [here](https://www.uni-muenster.de/Kowi/en/institut/arbeitsbereiche/digital-media-computational-methods.shtml).
 
-
-
-Please note, that generally a rate-limit of XX pertains for all XX. If you need 
-a higher rate-limit for
 
 ## How to install the Databoard package?
 
@@ -129,6 +129,6 @@ Jakob Jünger (University of Münster)
 
 **Citation**\
 
-Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding with Large Language Models. R package version 0.0.0.9000.
+Maubach, K. & Jünger, J. (2026). databoard: Automated Content Coding with Large Language Models. R package version 1.0.0.
 
 
