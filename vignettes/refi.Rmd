@@ -34,63 +34,76 @@ df <- sapply(files, function(f) paste(read_rtf(f), collapse = "\n"))
 df <- data.frame(file = basename(files), text = df, row.names = NULL)
 ```
 
-Create a codebook with annotation rules.
+Create a codebook with annotation rules and prepare the prompt patterns.
 
 ```{r}
+
 rules <- tibble::tribble(
   ~category, ~description, ~example,
-  "ACTIVE", "Aussagen zur aktiven Nutzung von Funktionen (Kommentieren, Liken, Weiterleiten, Beiträge erstelle etc.).", "Und ja, da gehe ich ab und zu mal durch und like die mal durch.",
-  "PASSIVE", "Aussagen zur Wahrnehmung von Markierungen bzw. Traces (Likes, Kommentare, Hashtags, Links, Mentions etc.)", "Viele Views bedeuten dass Kampagnen laufen"
+  "ACTIVE", "Aussagen zur aktiven Nutzung von Social-Media-Funktionen (Kommentieren, Liken, Weiterleiten, Beiträge erstelle etc.).", "Und ja, da gehe ich ab und zu mal durch und like die mal durch.",
+  "PASSIVE", "Aussagen zur Wahrnehmung von Digital Traces (Likes, Kommentare, Hashtags, Links, Mentions etc.)", "Viele Views bedeuten dass Kampagnen laufen"
 )
 
+prompts = list(
+  system = paste0(
+    "You are a researcher. Your task is to annotate interview transcripts.",
+    "Use the annotation rules provided to annotate matching sentences. ",
+    "Please carefully read the input text and determine for each sentence ",
+    "whether one of the annotation rules applies.",
+    "If a rule applies, wrap the matching sentence with the XML tag `<anno>`. ",
+    "Always annotate sentences or phrases, not single words. Only annotate answers, not interviewer questions.",
+    "Set the type attribute of the XML tag to the respective attribute value provided in the rule. ",
+    "Set the value attribute of the XML tag to the social media function that is the reason for your annotation.",
+    "Answer with the provided text including the new XML tags.",
+    "Return no explanation, no disclaimer and no other markers."
+  ),
+  user = paste0(
+    "Be careful not to change the original text, just insert the XML tags. ",
+    "Your output starts and ends exactly as the provided text. \n\n",
+    "# Annotation rules:\n",
+    "{{rules}}\n\n",
+    "# Text to annotate:\n",
+    "{{text}}"
+  )
+)
 ```
 
-Optionally, reduce your dataset to a smaller test sample
+
+
+For large text, it is advised to chunk the text.
 
 ```{r}
 df <- df |>
-  mutate(text = str_remove_all(text, "<[^>]+>")) |>
-  chunk_text(text, maxsize = 2000, overlap = 10) |>
-  slice_head(n=10)
+  mutate(text = str_remove_all(text, "[<>]")) |>
+  chunk_text(text, maxsize = 10000) |> 
+  
 ```
 
 # Submit and poll results
 
-```{r}
-results <- df |>
-  llm_annotate(
-    text, rules,
 
-    options = list (
-      prompts = list(
-        system = paste0(
-          "You are a researcher. Your task is to wrap sentences in XML tags. ",
-          "Use the annotation rules provided to annotate matching sentences. ",
-          "Please carefully read the input text and determine for each sentence ",
-          "whether one of the annotation rules applies.",
-          "If a rule applies, wrap the matching sentence with the XML tag `<anno>`. ",
-          "Always annotate sentences or phrases, not single words.",
-          "Set the value attribute of the XML tag to the respective attribute value provided in the rule. ",
-          "Answer with the provided text including the new XML tags.",
-          "Return no explanation, no disclaimer and no other markers"
-        ),
-        user = paste0(
-          "Be careful not to change the original text, just insert the XML tags. ",
-          "Your output starts and ends exactly as the provided text. \n\n",
-          "# Annotation rules:\n",
-          "{{rules}}\n\n",
-          "# Text to annotate:\n",
-          "{{text}}"
-        )
-      )
-    ),
+```{r}
+
+# For testing purposes, the dataset is reduced to the first 10 chunks.
+# The poll parameter makes sure that the function polls until all results have been processes.
+results <- df |>
+  slice_head(df, n=10) |> 
+  llm_annotate(
+    text, rules, 
+    options = list(prompts = prompts),
     poll = TRUE
   )
+
 ```
 
 # Save to REFI file
 
 ```{r}
+
+# View annotations in R
+annos <- unnest(results, cols = llm_annos)
+
+# Save to refi
 as_refi(results, "private/databoard.qdpx", text_col = "llm_result", name_col = "file")
 ```
 
